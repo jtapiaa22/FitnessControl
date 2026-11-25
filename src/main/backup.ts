@@ -2,7 +2,8 @@
 // - Al cerrar la app se guarda una copia por día en la carpeta elegida (por defecto
 //   Documentos\FitnessControl\Copias). Se conservan las últimas COPIAS_A_CONSERVAR.
 // - Restaurar reemplaza la base actual por una copia, guardando antes la actual.
-import { copyFile, mkdir, readdir, rm } from 'node:fs/promises'
+import { copyFile, mkdir, readdir, rename, rm } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { app } from 'electron'
 import Database from 'better-sqlite3'
@@ -20,6 +21,50 @@ export interface ResumenCopia {
 
 export function carpetaPorDefecto(): string {
   return join(app.getPath('documents'), 'FitnessControl', 'Copias')
+}
+
+/** Revisa que el archivo sea una copia sana de FitnessControl y cuenta lo que tiene. */
+export function revisarCopia(ruta: string): ResumenCopia {
+  let copia: Database.Database | null = null
+  try {
+    copia = new Database(ruta, { readonly: true, fileMustExist: true })
+    const version = copia.pragma('user_version', { simple: true }) as number
+    if (version < 1) throw new Error('vacía')
+    if (version > VERSION_ESQUEMA) throw new Error('La copia es de una versión más nueva de FitnessControl. Actualizá la app primero.')
+    if (copia.pragma('quick_check', { simple: true }) !== 'ok') throw new Error('dañada')
+    const alumnos = (copia.prepare('SELECT COUNT(*) AS n FROM alumno').get() as { n: number }).n
+    const controles = (copia.prepare('SELECT COUNT(*) AS n FROM control').get() as { n: number }).n
+    return { alumnos, controles }
+  } catch (e) {
+    const mensaje = (e as Error).message
+    throw new Error(mensaje.startsWith('La copia') ? mensaje : 'El archivo elegido no es una copia válida de FitnessControl.')
+  } finally {
+    copia?.close()
+  }
+}
+
+/** Pone la copia en lugar de la base y reinicia la app. */
+async function reemplazarYReiniciar(ruta: string, rutaBase: string): Promise<void> {
+  await rm(`${rutaBase}-wal`, { force: true })
+  await rm(`${rutaBase}-shm`, { force: true })
+  await copyFile(ruta, rutaBase)
+  app.relaunch()
+  app.exit(0)
+}
+
+/**
+ * Para cuando la base no se puede abrir: aparta los archivos dañados (no los borra)
+ * en una carpeta "danada-<fecha>" y restaura la copia elegida.
+ */
+export async function restaurarSobreBaseDanada(ruta: string, rutaBase: string): Promise<void> {
+  revisarCopia(ruta)
+  const apartado = join(app.getPath('userData'), `danada-${new Date().toISOString().replace(/[:.]/g, '-')}`)
+  await mkdir(apartado, { recursive: true })
+  for (const sufijo of ['', '-wal', '-shm', '-journal']) {
+    const archivo = `${rutaBase}${sufijo}`
+    if (existsSync(archivo)) await rename(archivo, join(apartado, `fitness-control.db${sufijo}`))
+  }
+  await reemplazarYReiniciar(ruta, rutaBase)
 }
 
 export function crearBackup(db: Database.Database, repo: Repositorio, rutaBase: string) {
@@ -52,39 +97,18 @@ export function crearBackup(db: Database.Database, repo: Repositorio, rutaBase: 
     }
   }
 
-  /** Revisa que el archivo sea una base de FitnessControl y cuenta lo que tiene. */
-  function revisar(ruta: string): ResumenCopia {
-    let copia: Database.Database | null = null
-    try {
-      copia = new Database(ruta, { readonly: true, fileMustExist: true })
-      const version = copia.pragma('user_version', { simple: true }) as number
-      if (version < 1) throw new Error('vacía')
-      if (version > VERSION_ESQUEMA) throw new Error('La copia es de una versión más nueva de FitnessControl. Actualizá la app primero.')
-      const alumnos = (copia.prepare('SELECT COUNT(*) AS n FROM alumno').get() as { n: number }).n
-      const controles = (copia.prepare('SELECT COUNT(*) AS n FROM control').get() as { n: number }).n
-      return { alumnos, controles }
-    } catch (e) {
-      const mensaje = (e as Error).message
-      throw new Error(mensaje.startsWith('La copia') ? mensaje : 'El archivo elegido no es una copia válida de FitnessControl.')
-    } finally {
-      copia?.close()
-    }
-  }
+  const revisar = revisarCopia
 
   /**
    * Reemplaza la base actual por la copia y reinicia la app. Antes guarda la base
    * actual en la carpeta de datos, por si hay que volver atrás.
    */
   async function restaurar(ruta: string): Promise<void> {
-    revisar(ruta)
+    revisarCopia(ruta)
     const marca = new Date().toISOString().replace(/[:.]/g, '-')
     await db.backup(join(app.getPath('userData'), `antes-de-restaurar-${marca}.db`))
     db.close()
-    await rm(`${rutaBase}-wal`, { force: true })
-    await rm(`${rutaBase}-shm`, { force: true })
-    await copyFile(ruta, rutaBase)
-    app.relaunch()
-    app.exit(0)
+    await reemplazarYReiniciar(ruta, rutaBase)
   }
 
   return { carpetaActual, hacerCopia, revisar, restaurar }

@@ -7,7 +7,7 @@ Desktop app (Electron + TypeScript) for a personal-training instructor: record e
 - `npm run dev`: app en modo desarrollo
 - `npm run typecheck` / `npm test` / `npm run build`
 - `npm run instalador`: instalador de Windows en `release/<versión>/` (config en `electron-builder.yml`, ícono en `build/`)
-- `npm run demo` / `npm run demo -- --borrar`: alumnos de ejemplo marcados `[Demo]` (con la app cerrada)
+- `npm run demo` / `npm run demo -- --borrar`: alumnos de ejemplo marcados `(alumno de ejemplo)` en las notas (con la app cerrada)
 - Pruebas automáticas sin tocar datos reales: `FITNESS_DATOS`, `FITNESS_PDF_DESTINO`, `FITNESS_COPIA_A_RESTAURAR` (ver README)
 - La base vive en `%APPDATA%\fitness-control\fitness-control.db` (forzado con `app.setPath`, igual en dev e instalada) y solo la abre el proceso main.
 - Copias de seguridad: `src/main/backup.ts` (copia al cerrar, últimas 30, restaurar guardando antes la base actual).

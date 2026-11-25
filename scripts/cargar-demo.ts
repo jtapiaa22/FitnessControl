@@ -1,21 +1,23 @@
 // Carga alumnos de ejemplo en la base local para probar la app.
 //   npm run demo            → carga los alumnos de ejemplo
 //   npm run demo -- --borrar → borra solo los alumnos de ejemplo
-// Los alumnos de ejemplo llevan "[Demo]" al principio de sus notas; nunca se tocan otros.
+// Los alumnos de ejemplo terminan sus notas con "(alumno de ejemplo)"; nunca se tocan otros.
+// (También borra los de versiones anteriores, marcados con "[Demo]" al principio.)
 // Cerrá la app antes de correrlo.
 import { join } from 'node:path'
 import Database from 'better-sqlite3'
 import { migrar } from '../src/main/db/esquema.ts'
 import { crearRepositorio } from '../src/main/db/repositorio.ts'
 
-const MARCA = '[Demo]'
+const MARCA = '(alumno de ejemplo)'
 const ruta = join(process.env.APPDATA ?? '', 'fitness-control', 'fitness-control.db')
 const db = new Database(ruta)
+db.pragma('journal_mode = DELETE')
 db.pragma('foreign_keys = ON')
 migrar(db)
 const repo = crearRepositorio(db)
 
-const borrados = db.prepare(`DELETE FROM alumno WHERE notas LIKE '${MARCA}%'`).run().changes
+const borrados = db.prepare(`DELETE FROM alumno WHERE notas LIKE '%${MARCA}' OR notas LIKE '[Demo]%'`).run().changes
 if (process.argv.includes('--borrar')) {
   console.log(`Borrados ${borrados} alumnos de ejemplo de ${ruta}`)
   process.exit(0)
@@ -48,7 +50,7 @@ interface Punto {
 }
 
 function cargar(alumno: Parameters<typeof repo.alumnos.crear>[0], puntos: Punto[], extras: { archivado?: boolean; osea: number; metabolismo: number } ) {
-  const a = repo.alumnos.crear({ ...alumno, notas: `${MARCA} ${alumno.notas ?? ''}`.trim() })
+  const a = repo.alumnos.crear({ ...alumno, notas: `${alumno.notas ?? ''} ${MARCA}`.trim() })
   for (const p of puntos) {
     const grasaKg = (p.peso * p.grasa) / 100
     const musculo = p.peso - grasaKg - extras.osea // como la balanza: músculo + grasa + hueso = peso
@@ -133,7 +135,7 @@ cargados.push(
 )
 
 // 4. Alumno nuevo, sin controles todavía → "Primer control".
-repo.alumnos.crear({ nombre: 'Martín Gómez', telefono: '381 555-9090', fechaNacimiento: '1985-05-17', sexo: 'masculino', notas: `${MARCA} Arranca la semana que viene.`, alturaM: 1.74, objetivo: 'bajar', frecuenciaDias: 7 })
+repo.alumnos.crear({ nombre: 'Martín Gómez', telefono: '381 555-9090', fechaNacimiento: '1985-05-17', sexo: 'masculino', notas: `Arranca la semana que viene. ${MARCA}`, alturaM: 1.74, objetivo: 'bajar', frecuenciaDias: 7 })
 cargados.push('Martín Gómez')
 
 // 5. Alumna archivada (dejó de venir).

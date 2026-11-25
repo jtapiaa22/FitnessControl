@@ -16,7 +16,7 @@ npm run dev
 | `npm run dev` | Abre la app en modo desarrollo |
 | `npm test` | Corre los tests (cálculos, comparación, controles pendientes) |
 | `npm run typecheck` | Revisa los tipos de TypeScript |
-| `npm run demo` | Carga 5 alumnos de ejemplo (con la app cerrada) |
+| `npm run demo` | Carga 5 alumnos de ejemplo, marcados "(alumno de ejemplo)" en sus notas (con la app cerrada) |
 | `npm run demo -- --borrar` | Borra solo los alumnos de ejemplo |
 | `npm run instalador` | Genera el instalador de Windows |
 

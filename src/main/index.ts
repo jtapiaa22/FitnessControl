@@ -2,8 +2,8 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron'
 import { CANALES } from '@shared/api'
-import { crearBackup, type Backup } from './backup'
-import { abrirBaseDeDatos, rutaBaseDeDatos } from './db'
+import { carpetaPorDefecto, crearBackup, restaurarSobreBaseDanada, type Backup } from './backup'
+import { abrirBaseDeDatos, BaseDanadaError, rutaBaseDeDatos } from './db'
 import { crearRepositorio, type Repositorio } from './db/repositorio'
 
 // La carpeta de datos es siempre %APPDATA%\fitness-control, en desarrollo y en la
@@ -155,13 +155,62 @@ function registrarReporte(): void {
   })
 }
 
-app.whenReady().then(() => {
-  registrarIpc()
-  crearVentana()
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) crearVentana()
+// Una sola instancia: dos ventanas usando la misma base a la vez es buscar problemas.
+if (!app.requestSingleInstanceLock()) {
+  app.exit(0)
+} else {
+  app.on('second-instance', () => {
+    const ventana = BrowserWindow.getAllWindows()[0]
+    if (ventana) {
+      if (ventana.isMinimized()) ventana.restore()
+      ventana.focus()
+    }
   })
-})
+
+  app.whenReady().then(async () => {
+    try {
+      registrarIpc()
+    } catch (e) {
+      if (e instanceof BaseDanadaError) return ofrecerRestaurar(e)
+      throw e
+    }
+    crearVentana()
+    app.on('activate', () => {
+      if (BrowserWindow.getAllWindows().length === 0) crearVentana()
+    })
+  })
+}
+
+/** La base no se pudo abrir: se ofrece restaurar una copia en vez de seguir. */
+async function ofrecerRestaurar(error: Error): Promise<void> {
+  console.error('Base dañada:', error.message)
+  const { response } = await dialog.showMessageBox({
+    type: 'error',
+    title: 'FitnessControl',
+    message: 'No se pudieron abrir tus datos.',
+    detail:
+      'El archivo de datos parece dañado. Podés restaurar una de tus copias de seguridad (se guarda una cada vez que cerrás la app). ' +
+      'El archivo dañado no se borra: queda apartado en la carpeta de datos.',
+    buttons: ['Restaurar una copia…', 'Cerrar'],
+    defaultId: 0,
+    cancelId: 1
+  })
+  if (response !== 0) return app.exit(1)
+  const { canceled, filePaths } = await dialog.showOpenDialog({
+    title: 'Elegir copia para restaurar',
+    defaultPath: carpetaPorDefecto(),
+    filters: [{ name: 'Copia de FitnessControl', extensions: ['db'] }],
+    properties: ['openFile']
+  })
+  const ruta = filePaths[0]
+  if (canceled || !ruta) return app.exit(1)
+  try {
+    await restaurarSobreBaseDanada(ruta, rutaBaseDeDatos())
+  } catch (e) {
+    dialog.showErrorBox('FitnessControl', (e as Error).message)
+    app.exit(1)
+  }
+}
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
