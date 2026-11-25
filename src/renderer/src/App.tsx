@@ -1,5 +1,6 @@
 import { NavLink, Route, Routes } from 'react-router-dom'
 import icono from './assets/icono.png'
+import AvisoActualizacion from './components/AvisoActualizacion'
 import AlumnoForm from './pages/AlumnoForm'
 import Alumnos from './pages/Alumnos'
 import Comparacion from './pages/Comparacion'
@@ -60,6 +61,7 @@ export default function App() {
         </div>
       </aside>
       <main className="contenido">
+        <AvisoActualizacion />
         <Routes>
           <Route path="/" element={<Inicio />} />
           <Route path="/alumnos" element={<Alumnos />} />

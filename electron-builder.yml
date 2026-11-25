@@ -1,4 +1,7 @@
-# Instalador de Windows. Se genera con: npm run instalador
+# Instalador de Windows.
+#   npm run instalador → solo genera el instalador en release/<versión>/
+#   npm run release    → lo genera y lo publica en GitHub Releases (necesita GH_TOKEN);
+#                        las apps instaladas se actualizan solas desde ahí.
 appId: com.tadevstudio.fitnesscontrol
 productName: FitnessControl
 copyright: © 2026 TADevStudio
@@ -35,3 +38,9 @@ nsis:
   language: '3082'
   # Al desinstalar NO se borran los datos (%APPDATA%\fitness-control).
   deleteAppDataOnUninstall: false
+# Actualizaciones: GitHub Releases del repo (público). electron-updater lee latest.yml.
+publish:
+  provider: github
+  owner: jtapiaa22
+  repo: FitnessControl
+  releaseType: release

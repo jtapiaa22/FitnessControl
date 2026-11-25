@@ -199,6 +199,10 @@ legend + * { clear: both; }
 
 .derecha-auto { order: 99; margin-left: auto; }
 
+/* ---------- Actualizaciones ---------- */
+.aviso-actualizacion { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin: -0.5rem 0 1.5rem; padding: 0.75rem 1rem 0.75rem 1.25rem; background: #e7f1fd; border-radius: var(--radio); color: #0b3d75; }
+.aviso-actualizacion span { flex: 1 1 20rem; }
+
 /* ---------- Reportes ---------- */
 .acciones-reporte { display: flex; flex-direction: column; gap: 0.625rem; }
 button.whatsapp { background: #25d366; color: #fff; }
@@ -323,7 +327,7 @@ button.whatsapp:hover { background: #1ebe5b; }
 @media print {
   @page { size: A4; }
   html, body, :root { background: #fff; }
-  .barra, .panel-reporte { display: none !important; }
+  .barra, .panel-reporte, .aviso-actualizacion { display: none !important; }
   .app { display: block; }
   .contenido { padding: 0; }
   .contenido > * { animation: none; }

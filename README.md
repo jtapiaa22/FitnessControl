@@ -18,9 +18,41 @@ npm run dev
 | `npm run typecheck` | Revisa los tipos de TypeScript |
 | `npm run demo` | Carga 5 alumnos de ejemplo, marcados "(alumno de ejemplo)" en sus notas (con la app cerrada) |
 | `npm run demo -- --borrar` | Borra solo los alumnos de ejemplo |
-| `npm run instalador` | Genera el instalador de Windows |
+| `npm run instalador` | Genera el instalador de Windows (sin publicarlo) |
+| `npm run release` | Genera el instalador y lo **publica** en GitHub: las apps instaladas se actualizan solas |
 
-## Generar el instalador
+## Publicar una versión nueva (actualización automática)
+
+Mismo esquema que KioscoApp: la app instalada se actualiza sola desde **GitHub Releases** de este repo.
+
+1. Subí la versión en `package.json` (por ejemplo, de 0.1.0 a 0.1.1):
+
+   ```powershell
+   npm version patch --no-git-tag-version
+   ```
+
+2. Publicala (usa la variable de entorno `GH_TOKEN`, con permiso de escritura sobre el repo):
+
+   ```powershell
+   npm run release
+   ```
+
+   Esto crea la release `v0.1.1` en GitHub con el instalador, su `.blockmap` y `latest.yml`.
+
+3. Hacé commit y push del cambio de versión.
+
+**Qué pasa en la compu de la instructora:**
+- La app busca versiones nuevas a los 15 segundos de abrirse y después cada 4 horas. La descarga sola, en segundo plano.
+- Cuando termina de descargar, aparece arriba un aviso: *"Hay una versión nueva. Se instala sola la próxima vez que cierres la app"*, con el botón **Reiniciar y actualizar**.
+- **Nunca se reinicia sola** en medio del trabajo. Antes de instalar se hace igual la copia de seguridad.
+- También puede buscar a mano en **Configuración → Acerca de → Buscar actualizaciones**.
+
+**Importante:**
+- Solo se actualizan las instalaciones hechas desde la versión 0.1.0 en adelante con actualizaciones (este commit o posterior). Si alguien tiene un instalador anterior, hay que instalarle una vez el nuevo a mano.
+- En `npm run dev` las actualizaciones están desactivadas.
+- El repo es **público**, así que la app no necesita ningún token para bajar actualizaciones. Si algún día lo pasás a privado, hay que compilar con un token de solo lectura: `FITNESS_UPDATE_TOKEN=... npm run release`, igual que `KIOSCO_UPDATE_TOKEN` en KioscoApp. Ver `src/main/actualizaciones.ts`.
+
+## Generar el instalador (sin publicar)
 
 ```powershell
 npm run instalador
@@ -28,7 +60,7 @@ npm run instalador
 
 El instalador queda en `release\<versión>\FitnessControl-Setup-<versión>.exe`, por ejemplo `release\0.1.0\FitnessControl-Setup-0.1.0.exe`. Es el único archivo que hay que pasarle a la instructora.
 
-- Para una versión nueva, subí el número de `"version"` en `package.json` antes de generar el instalador.
+- Para una versión nueva, subí el número de `"version"` en `package.json` antes de generar el instalador. Para que les llegue sola a quienes ya la tienen instalada, usá `npm run release` (ver arriba).
 - Instalar una versión nueva encima de la anterior **no borra los datos**, y desinstalar tampoco.
 - El instalador no está firmado digitalmente. La primera vez, Windows puede mostrar "Windows protegió su PC": se instala con **Más información → Ejecutar de todas formas**. Ver "Firma digital" más abajo.
 - El ícono sale de `build/icon.ico` (y `build/icon.png`). Para cambiarlo, reemplazá esos archivos.

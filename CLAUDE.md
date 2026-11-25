@@ -7,6 +7,7 @@ Desktop app (Electron + TypeScript) for a personal-training instructor: record e
 - `npm run dev`: app en modo desarrollo
 - `npm run typecheck` / `npm test` / `npm run build`
 - `npm run instalador`: instalador de Windows en `release/<versión>/` (config en `electron-builder.yml`, ícono en `build/`)
+- `npm run release`: publica en GitHub Releases (necesita `GH_TOKEN`); la app instalada se actualiza sola con electron-updater (`src/main/actualizaciones.ts`). Subir antes la versión con `npm version patch --no-git-tag-version`.
 - `npm run demo` / `npm run demo -- --borrar`: alumnos de ejemplo marcados `(alumno de ejemplo)` en las notas (con la app cerrada)
 - Pruebas automáticas sin tocar datos reales: `FITNESS_DATOS`, `FITNESS_PDF_DESTINO`, `FITNESS_COPIA_A_RESTAURAR`, `FITNESS_SIN_ABRIR` (ver README)
 - Carpetas en `src/main/carpetas.ts`: la app instalada usa `%APPDATA%\fitness-control` (y Documentos\FitnessControl para copias y reportes); `npm run dev` usa `.datos-dev\` dentro del proyecto. Nunca se mezclan. Solo el proceso main abre la base.

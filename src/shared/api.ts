@@ -1,5 +1,15 @@
 import type { Alumno, AlumnoConResumen, AlumnoNuevo, CampoReporte, Configuracion, Control, ControlNuevo, ReporteGuardado } from './tipos'
 
+/** Estado de las actualizaciones automáticas (ver src/main/actualizaciones.ts). */
+export type EstadoActualizacion =
+  | { tipo: 'inactivo' }
+  | { tipo: 'buscando' }
+  | { tipo: 'al-dia'; version: string }
+  | { tipo: 'disponible'; version: string }
+  | { tipo: 'descargando'; porcentaje: number }
+  | { tipo: 'descargada'; version: string }
+  | { tipo: 'error'; mensaje: string }
+
 /** API que el preload expone al renderer como `window.api`. */
 export interface FitnessApi {
   alumnos: {
@@ -31,6 +41,15 @@ export interface FitnessApi {
     elegirCopia(): Promise<{ ruta: string; alumnos: number; controles: number } | null>
     /** Reemplaza los datos actuales por la copia y reinicia la app. */
     restaurar(ruta: string): Promise<void>
+  }
+  actualizaciones: {
+    estado(): Promise<EstadoActualizacion>
+    /** Busca una versión nueva ahora (solo en la app instalada). */
+    buscar(): Promise<void>
+    /** Cierra la app e instala la versión descargada. */
+    instalarAhora(): Promise<void>
+    /** Avisa cada cambio de estado. Devuelve la función para dejar de escuchar. */
+    alCambiar(fn: (estado: EstadoActualizacion) => void): () => void
   }
   reporte: {
     /**
@@ -75,6 +94,10 @@ export const CANALES = {
   backupAbrirCarpeta: 'backup:abrirCarpeta',
   backupElegirCopia: 'backup:elegirCopia',
   backupRestaurar: 'backup:restaurar',
+  actualizacionEstado: 'actualizacion:estado',
+  actualizacionEstadoActual: 'actualizacion:estadoActual',
+  actualizacionBuscar: 'actualizacion:buscar',
+  actualizacionInstalar: 'actualizacion:instalar',
   reporteGuardarPdf: 'reporte:guardarPdf',
   reporteHistorial: 'reporte:historial',
   reporteAbrir: 'reporte:abrir',

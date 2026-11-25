@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import { CANALES, type FitnessApi } from '@shared/api'
+import { CANALES, type EstadoActualizacion, type FitnessApi } from '@shared/api'
 
 const api: FitnessApi = {
   alumnos: {
@@ -26,6 +26,16 @@ const api: FitnessApi = {
     abrirCarpeta: () => ipcRenderer.invoke(CANALES.backupAbrirCarpeta),
     elegirCopia: () => ipcRenderer.invoke(CANALES.backupElegirCopia),
     restaurar: (ruta) => ipcRenderer.invoke(CANALES.backupRestaurar, ruta)
+  },
+  actualizaciones: {
+    estado: () => ipcRenderer.invoke(CANALES.actualizacionEstadoActual),
+    buscar: () => ipcRenderer.invoke(CANALES.actualizacionBuscar),
+    instalarAhora: () => ipcRenderer.invoke(CANALES.actualizacionInstalar),
+    alCambiar: (fn) => {
+      const escuchar = (_e: Electron.IpcRendererEvent, estado: EstadoActualizacion) => fn(estado)
+      ipcRenderer.on(CANALES.actualizacionEstado, escuchar)
+      return () => ipcRenderer.removeListener(CANALES.actualizacionEstado, escuchar)
+    }
   },
   reporte: {
     guardarPdf: (datos) => ipcRenderer.invoke(CANALES.reporteGuardarPdf, datos),

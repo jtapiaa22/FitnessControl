@@ -5,6 +5,7 @@ import { CANALES } from '@shared/api'
 import { carpetaPorDefecto, crearBackup, restaurarSobreBaseDanada, type Backup } from './backup'
 import { abrirBaseDeDatos, BaseDanadaError, rutaBaseDeDatos } from './db'
 import { crearRepositorio, type Repositorio } from './db/repositorio'
+import { registrarActualizaciones } from './actualizaciones'
 import { carpetaDeDatos } from './carpetas'
 import { registrarReportes } from './reportes'
 
@@ -66,6 +67,7 @@ function registrarIpc(): void {
   ipcMain.handle(CANALES.configuracionObtener, () => repo.configuracion.obtener())
   ipcMain.handle(CANALES.configuracionGuardar, (_e, cambios) => repo.configuracion.guardar(cambios))
   registrarReportes(repo)
+  registrarActualizaciones()
   registrarBackup(backup, repo)
 }
 
