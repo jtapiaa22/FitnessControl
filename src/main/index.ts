@@ -38,6 +38,9 @@ function crearVentana(): void {
     if (url.startsWith('https://')) void shell.openExternal(url)
     return { action: 'deny' }
   })
+  // La ventana nunca sale de la app (por ejemplo, al soltar un archivo encima).
+  // La navegación interna es por #hash y no dispara este evento.
+  ventana.webContents.on('will-navigate', (e) => e.preventDefault())
 
   if (!app.isPackaged && process.env.ELECTRON_RENDERER_URL) {
     void ventana.loadURL(process.env.ELECTRON_RENDERER_URL)

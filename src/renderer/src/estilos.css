@@ -38,6 +38,14 @@ html { font-size: 100%; }
 }
 * { box-sizing: border-box; }
 body { margin: 0; }
+/*
+ * Es una app de escritorio, no una página web: los links, íconos e imágenes no se
+ * arrastran como archivos, y los textos de la interfaz (menú, botones, títulos de
+ * columnas) no se seleccionan al hacer clic. Los datos y campos sí se pueden copiar.
+ */
+a, img, svg { -webkit-user-drag: none; user-select: none; }
+.barra, button, .boton, label, legend, th, .etiqueta, .campo-etiqueta, .dato-etiqueta, h1, h2, figcaption { user-select: none; }
+input, textarea, select, td, .dato, .hoja { user-select: text; }
 a { color: var(--acento); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
