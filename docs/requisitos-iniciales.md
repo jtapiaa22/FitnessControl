@@ -83,7 +83,8 @@ Los términos están definidos en `GLOSSARY.md`.
 - Los PDF no se guardan en la app. La Nota del reporte sí se guarda con el Control.
 
 **Backup**
-- Copia automática al cerrar la app, en una carpeta elegible (por ejemplo, Google Drive). Incluye la opción de restaurar.
+- Copia automática al cerrar la app, una por día, en una carpeta elegible (por ejemplo, Google Drive). Por defecto: Documentos\FitnessControl\Copias. Se conservan las últimas 30.
+- Restaurar reemplaza todos los datos, previa confirmación, y guarda antes una copia de los datos actuales.
 
 **Stack**
 - Electron, TypeScript, React, Vite, better-sqlite3, Recharts y Vitest.

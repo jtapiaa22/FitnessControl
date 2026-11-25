@@ -19,6 +19,19 @@ export interface FitnessApi {
     obtener(): Promise<Configuracion>
     guardar(cambios: Partial<Configuracion>): Promise<Configuracion>
   }
+  backup: {
+    /** Carpeta donde se guardan las copias (la elegida o la de por defecto). */
+    carpeta(): Promise<string>
+    /** Abre el diálogo para elegir carpeta y la guarda. null si cancela. */
+    elegirCarpeta(): Promise<string | null>
+    /** Hace la copia ahora y devuelve la ruta del archivo. */
+    hacerCopia(): Promise<string>
+    abrirCarpeta(): Promise<void>
+    /** Abre el diálogo para elegir una copia y la revisa. null si cancela. */
+    elegirCopia(): Promise<{ ruta: string; alumnos: number; controles: number } | null>
+    /** Reemplaza los datos actuales por la copia y reinicia la app. */
+    restaurar(ruta: string): Promise<void>
+  }
   reporte: {
     /** Imprime la pantalla actual (con estilos @media print) a PDF y pide dónde guardarlo. null si cancela. */
     guardarPdf(nombreSugerido: string): Promise<string | null>
@@ -40,6 +53,12 @@ export const CANALES = {
   controlesEliminar: 'controles:eliminar',
   configuracionObtener: 'configuracion:obtener',
   configuracionGuardar: 'configuracion:guardar',
+  backupCarpeta: 'backup:carpeta',
+  backupElegirCarpeta: 'backup:elegirCarpeta',
+  backupHacerCopia: 'backup:hacerCopia',
+  backupAbrirCarpeta: 'backup:abrirCarpeta',
+  backupElegirCopia: 'backup:elegirCopia',
+  backupRestaurar: 'backup:restaurar',
   reporteGuardarPdf: 'reporte:guardarPdf',
   reporteAbrir: 'reporte:abrir',
   reporteMostrar: 'reporte:mostrarEnCarpeta'

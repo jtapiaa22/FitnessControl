@@ -111,4 +111,10 @@ export interface Configuracion {
   contacto: string | null
   /** Logo como data URL (image/png o image/jpeg). */
   logo: string | null
+  /** Carpeta de las copias de seguridad; null = carpeta por defecto. */
+  carpetaBackup: string | null
+  /** Fecha y hora (ISO) de la última copia hecha. */
+  ultimoBackup: string | null
+  /** Último error al hacer la copia, si lo hubo. */
+  errorBackup: string | null
 }

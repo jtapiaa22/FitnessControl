@@ -96,13 +96,21 @@ export function crearRepositorio(db: Database.Database) {
       obtener(): Configuracion {
         const filas = db.prepare('SELECT clave, valor FROM configuracion').all() as { clave: string; valor: string | null }[]
         const m = new Map(filas.map((f) => [f.clave, f.valor]))
-        return { nombreInstructora: m.get('nombreInstructora') ?? null, contacto: m.get('contacto') ?? null, logo: m.get('logo') ?? null }
+        const v = (clave: keyof Configuracion) => m.get(clave) ?? null
+        return {
+          nombreInstructora: v('nombreInstructora'),
+          contacto: v('contacto'),
+          logo: v('logo'),
+          carpetaBackup: v('carpetaBackup'),
+          ultimoBackup: v('ultimoBackup'),
+          errorBackup: v('errorBackup')
+        }
       },
       guardar(cambios: Partial<Configuracion>): Configuracion {
         const stmt = db.prepare(
           'INSERT INTO configuracion (clave, valor, actualizado_en) VALUES (?, ?, ?) ON CONFLICT(clave) DO UPDATE SET valor = excluded.valor, actualizado_en = excluded.actualizado_en'
         )
-        const permitidas: (keyof Configuracion)[] = ['nombreInstructora', 'contacto', 'logo']
+        const permitidas: (keyof Configuracion)[] = ['nombreInstructora', 'contacto', 'logo', 'carpetaBackup', 'ultimoBackup', 'errorBackup']
         db.transaction(() => {
           for (const clave of permitidas) if (clave in cambios) stmt.run(clave, cambios[clave] ?? null, ahora())
         })()

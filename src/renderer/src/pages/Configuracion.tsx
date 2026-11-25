@@ -1,4 +1,5 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
+import CopiasDeSeguridad from '../components/CopiasDeSeguridad'
 
 const TAMANO_MAXIMO_LOGO = 1_500_000
 
@@ -40,7 +41,7 @@ export default function Configuracion() {
     <section>
       <h1>Configuración</h1>
       <p className="tenue">Estos datos aparecen en el encabezado de los reportes.</p>
-      <form onSubmit={guardar} className="formulario" style={{ maxWidth: 640 }}>
+      <form onSubmit={guardar} className="formulario" style={{ maxWidth: 880 }}>
         <fieldset>
           <legend>Tus datos</legend>
           <div className="grilla">
@@ -77,6 +78,9 @@ export default function Configuracion() {
           {mensaje && <span className="tenue">{mensaje}</span>}
         </div>
       </form>
+      <div style={{ maxWidth: 880, marginTop: '1.5rem' }}>
+        <CopiasDeSeguridad />
+      </div>
     </section>
   )
 }

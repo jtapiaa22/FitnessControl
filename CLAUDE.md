@@ -6,13 +6,17 @@ Desktop app (Electron + TypeScript) for a personal-training instructor: record e
 
 - `npm run dev`: app en modo desarrollo
 - `npm run typecheck` / `npm test` / `npm run build`
-- La base vive en `%APPDATA%\fitness-control\fitness-control.db` y solo la abre el proceso main.
+- `npm run instalador`: instalador de Windows en `release/<versión>/` (config en `electron-builder.yml`, ícono en `build/`)
+- `npm run demo` / `npm run demo -- --borrar`: alumnos de ejemplo marcados `[Demo]` (con la app cerrada)
+- Pruebas automáticas sin tocar datos reales: `FITNESS_DATOS`, `FITNESS_PDF_DESTINO`, `FITNESS_COPIA_A_RESTAURAR` (ver README)
+- La base vive en `%APPDATA%\fitness-control\fitness-control.db` (forzado con `app.setPath`, igual en dev e instalada) y solo la abre el proceso main.
+- Copias de seguridad: `src/main/backup.ts` (copia al cerrar, últimas 30, restaurar guardando antes la base actual).
 - `better-sqlite3` necesita sus install scripts aprobados (`allowScripts` en package.json). Electron baja su binario con `node node_modules/electron/install.js` si falta `node_modules/electron/dist`.
 
 ## Estructura
 
 - `src/shared/`: tipos de dominio, API del preload y cálculos puros (testeables con Vitest, sin DB).
-- `src/main/`: proceso principal, SQLite (`db/esquema.ts` con migraciones por `user_version`) e IPC.
+- `src/main/`: proceso principal, backup, PDF, SQLite (`db/esquema.ts` con migraciones por `user_version`) e IPC.
 - `src/preload/`: expone `window.api` (contextIsolation activado).
 - `src/renderer/`: React + react-router (HashRouter).
 

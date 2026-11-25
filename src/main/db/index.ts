@@ -3,10 +3,12 @@ import { app } from 'electron'
 import Database from 'better-sqlite3'
 import { migrar } from './esquema'
 
-/** Abre (o crea) la base local en la carpeta de datos del usuario. Ver docs/adr/0001. */
+/** Ruta de la base local, en la carpeta de datos del usuario. Ver docs/adr/0001. */
+export const rutaBaseDeDatos = (): string => join(app.getPath('userData'), 'fitness-control.db')
+
+/** Abre (o crea) la base local y aplica las migraciones pendientes. */
 export function abrirBaseDeDatos(): Database.Database {
-  const ruta = join(app.getPath('userData'), 'fitness-control.db')
-  const db = new Database(ruta)
+  const db = new Database(rutaBaseDeDatos())
   db.pragma('journal_mode = WAL')
   db.pragma('foreign_keys = ON')
   migrar(db)

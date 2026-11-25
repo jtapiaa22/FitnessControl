@@ -63,6 +63,9 @@ const MIGRACIONES: string[] = [
   `
 ]
 
+/** Versión de esquema que conoce esta versión de la app. */
+export const VERSION_ESQUEMA = MIGRACIONES.length
+
 export function migrar(db: Database.Database): void {
   const versionActual = db.pragma('user_version', { simple: true }) as number
   for (let i = versionActual; i < MIGRACIONES.length; i++) {

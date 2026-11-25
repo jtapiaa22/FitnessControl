@@ -1,9 +1,15 @@
-import { writeFile } from 'node:fs/promises'
+import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron'
 import { CANALES } from '@shared/api'
-import { abrirBaseDeDatos } from './db'
-import { crearRepositorio } from './db/repositorio'
+import { crearBackup, type Backup } from './backup'
+import { abrirBaseDeDatos, rutaBaseDeDatos } from './db'
+import { crearRepositorio, type Repositorio } from './db/repositorio'
+
+// La carpeta de datos es siempre %APPDATA%\fitness-control, en desarrollo y en la
+// app instalada (el instalador le pone otro nombre visible a la app).
+// FITNESS_DATOS: solo para pruebas automáticas, usa otra carpeta de datos.
+app.setPath('userData', process.env.FITNESS_DATOS ?? join(app.getPath('appData'), 'fitness-control'))
 
 function crearVentana(): void {
   const ventana = new BrowserWindow({
@@ -13,6 +19,8 @@ function crearVentana(): void {
     minHeight: 560,
     show: false,
     title: 'FitnessControl',
+    // En la app instalada Windows usa el ícono del .exe; en desarrollo, el de build/.
+    ...(app.isPackaged ? {} : { icon: join(__dirname, '../../build/icon.png') }),
     autoHideMenuBar: true,
     webPreferences: {
       preload: join(__dirname, '../preload/index.mjs'),
@@ -40,7 +48,11 @@ function crearVentana(): void {
 function registrarIpc(): void {
   const db = abrirBaseDeDatos()
   const repo = crearRepositorio(db)
-  app.on('will-quit', () => db.close())
+  const backup = crearBackup(db, repo, rutaBaseDeDatos())
+  copiaAlCerrar(backup)
+  app.on('will-quit', () => {
+    if (db.open) db.close()
+  })
 
   ipcMain.handle(CANALES.alumnosListar, (_e, opciones) => repo.alumnos.listar(opciones))
   ipcMain.handle(CANALES.alumnosObtener, (_e, id: string) => repo.alumnos.obtener(id))
@@ -54,6 +66,63 @@ function registrarIpc(): void {
   ipcMain.handle(CANALES.configuracionObtener, () => repo.configuracion.obtener())
   ipcMain.handle(CANALES.configuracionGuardar, (_e, cambios) => repo.configuracion.guardar(cambios))
   registrarReporte()
+  registrarBackup(backup, repo)
+}
+
+/** Al cerrar la app, primero se hace la copia del día y después se cierra. */
+function copiaAlCerrar(backup: Backup): void {
+  let hecha = false
+  app.on('before-quit', (e) => {
+    if (hecha) return
+    e.preventDefault()
+    hecha = true
+    backup
+      .hacerCopia()
+      .catch((err: Error) => console.error('No se pudo hacer la copia al cerrar:', err.message))
+      .finally(() => app.quit())
+  })
+}
+
+function registrarBackup(backup: Backup, repo: Repositorio): void {
+  // Solo se puede restaurar un archivo elegido en el diálogo y ya revisado.
+  const elegidas = new Set<string>()
+  const ventanaDe = (e: Electron.IpcMainInvokeEvent) => BrowserWindow.fromWebContents(e.sender) ?? undefined
+
+  ipcMain.handle(CANALES.backupCarpeta, () => backup.carpetaActual())
+  ipcMain.handle(CANALES.backupHacerCopia, () => backup.hacerCopia())
+  ipcMain.handle(CANALES.backupAbrirCarpeta, async () => {
+    await mkdir(backup.carpetaActual(), { recursive: true })
+    await shell.openPath(backup.carpetaActual())
+  })
+  ipcMain.handle(CANALES.backupElegirCarpeta, async (e) => {
+    const opciones: Electron.OpenDialogOptions = { title: 'Carpeta para las copias de seguridad', defaultPath: backup.carpetaActual(), properties: ['openDirectory', 'createDirectory'] }
+    const ventana = ventanaDe(e)
+    const { canceled, filePaths } = ventana ? await dialog.showOpenDialog(ventana, opciones) : await dialog.showOpenDialog(opciones)
+    const carpeta = filePaths[0]
+    if (canceled || !carpeta) return null
+    repo.configuracion.guardar({ carpetaBackup: carpeta })
+    return carpeta
+  })
+  ipcMain.handle(CANALES.backupElegirCopia, async (e) => {
+    // FITNESS_COPIA_A_RESTAURAR: solo para pruebas automáticas, evita el diálogo.
+    const dePrueba = process.env.FITNESS_COPIA_A_RESTAURAR
+    const opciones: Electron.OpenDialogOptions = { title: 'Elegir copia para restaurar', defaultPath: backup.carpetaActual(), filters: [{ name: 'Copia de FitnessControl', extensions: ['db'] }], properties: ['openFile'] }
+    const ventana = ventanaDe(e)
+    const { canceled, filePaths } = dePrueba
+      ? { canceled: false, filePaths: [dePrueba] }
+      : ventana
+        ? await dialog.showOpenDialog(ventana, opciones)
+        : await dialog.showOpenDialog(opciones)
+    const ruta = filePaths[0]
+    if (canceled || !ruta) return null
+    const resumen = backup.revisar(ruta)
+    elegidas.add(ruta)
+    return { ruta, ...resumen }
+  })
+  ipcMain.handle(CANALES.backupRestaurar, async (_e, ruta: string) => {
+    if (!elegidas.has(ruta)) throw new Error('Elegí primero la copia a restaurar.')
+    await backup.restaurar(ruta)
+  })
 }
 
 /** PDF del Reporte: imprime la pantalla actual con sus estilos @media print. */

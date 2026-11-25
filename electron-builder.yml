@@ -1,0 +1,35 @@
+# Instalador de Windows. Se genera con: npm run instalador
+appId: com.fitnesscontrol.app
+productName: FitnessControl
+copyright: FitnessControl
+directories:
+  buildResources: build
+  output: release/${version}
+files:
+  - out/**
+  - package.json
+# SQLite (better-sqlite3) es un módulo nativo: tiene que quedar fuera del asar.
+asarUnpack:
+  - '**/*.node'
+npmRebuild: true
+# Solo los idiomas que hacen falta (Chromium trae más de 50).
+electronLanguages: [es, es-419, en-US]
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+  icon: build/icon.ico
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  shortcutName: FitnessControl
+  artifactName: FitnessControl-Setup-${version}.${ext}
+  installerIcon: build/icon.ico
+  uninstallerIcon: build/icon.ico
+  installerLanguages: [es_ES]
+  language: '3082'
+  # Al desinstalar NO se borran los datos (%APPDATA%\fitness-control).
+  deleteAppDataOnUninstall: false
