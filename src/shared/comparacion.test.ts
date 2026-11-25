@@ -66,6 +66,25 @@ describe('compararControles', () => {
     expect(filas.filter((f) => f.campo === 'brazoRelajado')).toHaveLength(1)
   })
 
+  it('un lado contra ambos lados compara solo el lado que está en los dos Controles', () => {
+    // Control 1: solo izquierdo · Control 2: ambos lados
+    const control1 = control({ musloIzqCm: 52 })
+    const control2 = control({ ambosLados: true, musloIzqCm: 51, musloDerCm: 53 })
+    const filas = compararControles(control1, control2).filter((f) => f.campo === 'muslo')
+    expect(filas).toHaveLength(1)
+    expect(filas[0]).toMatchObject({ lado: 'izq', base: 52, actual: 51 })
+    expect(filas[0]!.diferencia).toBeCloseTo(-1, 5)
+  })
+
+  it('ambos lados contra ambos lados compara los dos lados', () => {
+    // Control 2 y Control 3 midieron ambos lados
+    const control2 = control({ ambosLados: true, musloIzqCm: 51, musloDerCm: 53 })
+    const control3 = control({ ambosLados: true, musloIzqCm: 50, musloDerCm: 52.5 })
+    const filas = compararControles(control2, control3).filter((f) => f.campo === 'muslo')
+    expect(filas.map((f) => f.lado)).toEqual(['izq', 'der'])
+    expect(fila(filas, 'muslo', 'der').diferencia).toBeCloseTo(-0.5, 5)
+  })
+
   it('nunca cruza lados: un Control con solo el izquierdo y otro con solo el derecho no tienen diferencia', () => {
     const filas = compararControles(control({ musloIzqCm: 52 }), control({ musloDerCm: 51 }))
     expect(fila(filas, 'muslo', 'izq')).toMatchObject({ base: 52, actual: null, diferencia: null })

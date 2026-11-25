@@ -59,15 +59,21 @@ function comparar(campo: CampoReporte, base: number | null, actual: number | nul
 
 /**
  * Compara dos Controles campo por campo. Las extremidades se comparan siempre
- * lado contra lado y nunca se cruzan: hay una fila por cada lado medido en
- * alguno de los dos Controles (o una sola fila vacía si no se midió ninguno).
+ * lado contra lado y nunca se cruzan:
+ * - Se comparan los lados medidos en los dos Controles (un lado contra ambos →
+ *   solo ese lado; ambos contra ambos → los dos).
+ * - Si no hay ningún lado en común, se muestran los lados medidos sin diferencia.
+ * - Si no se midió ningún lado, queda una sola fila vacía.
  */
 export function compararControles(base: Control, actual: Control): FilaComparacion[] {
   const filas = CAMPOS.map(([campo, valor]) => comparar(campo, valor(base), valor(actual)))
   for (const [campo, lados] of EXTREMIDADES) {
-    const medidos = (['izq', 'der'] as const).filter((l) => lados[l](base) !== null || lados[l](actual) !== null)
-    if (medidos.length === 0) filas.push(comparar(campo, null, null))
-    for (const l of medidos) filas.push(comparar(campo, lados[l](base), lados[l](actual), l))
+    const todos = ['izq', 'der'] as const
+    const enComun = todos.filter((l) => lados[l](base) !== null && lados[l](actual) !== null)
+    const enAlguno = todos.filter((l) => lados[l](base) !== null || lados[l](actual) !== null)
+    const aMostrar = enComun.length > 0 ? enComun : enAlguno
+    if (aMostrar.length === 0) filas.push(comparar(campo, null, null))
+    for (const l of aMostrar) filas.push(comparar(campo, lados[l](base), lados[l](actual), l))
   }
   return filas
 }

@@ -67,7 +67,7 @@ Los términos están definidos en `GLOSSARY.md`.
 **Control**
 - Solo la fecha es obligatoria.
 - Datos de balanza: peso, % grasa, músculo (kg), grasa visceral, masa ósea, % proteína y metabolismo basal. No se carga agua ni tipo de cuerpo.
-- Medidas en cm: pecho, cintura, cadera, muslo, brazo relajado y brazo contraído. Con el check "Ambos lados" (por Control), muslo y brazos llevan valor izquierdo y derecho; si no, se mide un solo lado (izquierdo o derecho). Siempre se compara lado contra lado.
+- Medidas en cm: pecho, cintura, cadera, muslo, brazo relajado y brazo contraído. Con el check "Ambos lados" (por Control), muslo y brazos llevan valor izquierdo y derecho; si no, se mide un solo lado (izquierdo o derecho). Siempre se compara lado contra lado, y solo los lados medidos en los dos Controles (un lado contra ambos → ese lado; ambos contra ambos → los dos).
 - Altura pre-cargada desde el Alumno, editable, con selector cm/m. Se guarda en metros.
 - Cálculos: IMC (peso / altura²), masa grasa, masa magra, % músculo e índice cintura/cadera.
 - Avisos amarillos que no bloquean, para valores fuera de rango o saltos grandes contra el Control anterior.

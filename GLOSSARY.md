@@ -42,7 +42,7 @@ Perímetros tomados con cinta en un Control, en cm: pecho, cintura, cadera, musl
 _Avoid_: Perímetros, circunferencias
 
 **Ambos lados**:
-Opción de un Control para medir el lado izquierdo y el derecho en las Medidas de las extremidades (muslo y brazos). Sin esta opción se mide un solo lado. En una Comparación cada lado se compara siempre contra el mismo lado. Pecho, cintura y cadera llevan un solo valor.
+Opción de un Control para medir el lado izquierdo y el derecho en las Medidas de las extremidades (muslo y brazos). Sin esta opción se mide un solo lado. En una Comparación se comparan solo los lados medidos en los dos Controles, siempre contra el mismo lado: un lado contra ambos compara ese lado; ambos contra ambos compara los dos. Pecho, cintura y cadera llevan un solo valor.
 
 **Brazo contraído**:
 Perímetro del brazo mientras el Alumno hace fuerza.
