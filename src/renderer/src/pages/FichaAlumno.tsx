@@ -104,6 +104,7 @@ export default function FichaAlumno() {
       {controles.length === 0 ? (
         <p className="tenue">Todavía no tiene controles.</p>
       ) : (
+        <div className="tabla-scroll">
         <table className="tabla clicable">
           <thead>
             <tr>
@@ -132,6 +133,7 @@ export default function FichaAlumno() {
             ))}
           </tbody>
         </table>
+        </div>
       )}
     </section>
   )

@@ -9,8 +9,8 @@ function crearVentana(): void {
   const ventana = new BrowserWindow({
     width: 1280,
     height: 820,
-    minWidth: 960,
-    minHeight: 640,
+    minWidth: 640,
+    minHeight: 560,
     show: false,
     title: 'FitnessControl',
     autoHideMenuBar: true,

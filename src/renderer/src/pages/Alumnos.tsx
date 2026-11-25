@@ -45,6 +45,7 @@ export default function Alumnos() {
       {visibles.length === 0 ? (
         <p className="tenue">{alumnos.length === 0 ? 'Todavía no hay alumnos cargados.' : 'Ningún alumno coincide con la búsqueda.'}</p>
       ) : (
+        <div className="tabla-scroll">
         <table className="tabla clicable">
           <thead>
             <tr>
@@ -73,6 +74,7 @@ export default function Alumnos() {
             ))}
           </tbody>
         </table>
+        </div>
       )}
     </section>
   )

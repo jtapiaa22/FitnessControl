@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { masaGrasaKg } from '@shared/calculos'
 import { compararControles, type FilaComparacion } from '@shared/comparacion'
@@ -15,6 +15,9 @@ const GRUPOS: { titulo: string; campos: CampoReporte[] }[] = [
 
 /** Datos destacados arriba del Reporte, si están elegidos. */
 const DESTACADOS: CampoReporte[] = ['peso', 'masaGrasa', 'musculo', 'cintura']
+
+/** Ancho de la hoja A4 en pantalla (96 ppp). */
+const ANCHO_HOJA = 794
 
 /** Ancho útil de una hoja A4 con márgenes de 0,4": unos 715 px. */
 const ANCHO_GRAFICO = 700
@@ -34,6 +37,18 @@ export default function Reporte() {
   const [nota, setNota] = useState('')
   const [estado, setEstado] = useState<{ tipo: 'ok'; ruta: string } | { tipo: 'error'; mensaje: string } | null>(null)
   const [generando, setGenerando] = useState(false)
+  // La vista previa se achica para entrar en la ventana; el PDF siempre sale en tamaño real.
+  const contenedor = useRef<HTMLDivElement>(null)
+  const [escala, setEscala] = useState(1)
+  useEffect(() => {
+    const el = contenedor.current
+    if (!el) return
+    const medir = () => setEscala(Math.min(1, el.clientWidth / ANCHO_HOJA))
+    const observador = new ResizeObserver(medir)
+    observador.observe(el)
+    medir()
+    return () => observador.disconnect()
+  }, [alumno, controles, config])
 
   useEffect(() => {
     Promise.all([window.api.alumnos.obtener(id), window.api.controles.listarPorAlumno(id), window.api.configuracion.obtener()]).then(
@@ -128,6 +143,7 @@ export default function Reporte() {
             Todavía no cargaste tu nombre ni tu logo. <Link to="/configuracion">Configurar</Link>
           </p>
         )}
+        <div className="grupos">
         {GRUPOS.map((g) => (
           <fieldset key={g.titulo}>
             <legend>{g.titulo}</legend>
@@ -140,6 +156,7 @@ export default function Reporte() {
             ))}
           </fieldset>
         ))}
+        </div>
         <label className="campo">
           <span className="campo-etiqueta">Nota para {alumno.nombre.split(' ')[0]}</span>
           <textarea rows={5} value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Ej.: ¡Muy bien esta semana! Seguimos con…" />
@@ -163,7 +180,8 @@ export default function Reporte() {
         {estado?.tipo === 'error' && <p className="error">{estado.mensaje}</p>}
       </aside>
 
-      <article className="hoja">
+      <div className="vista-previa" ref={contenedor}>
+      <article className="hoja" style={{ zoom: escala }}>
         <header className="hoja-encabezado">
           <div className="hoja-marca">
             {config.logo && <img src={config.logo} alt="" className="hoja-logo" />}
@@ -208,6 +226,7 @@ export default function Reporte() {
 
         <footer className="hoja-pie">Generado el {formatearFecha(hoyLocal())}</footer>
       </article>
+      </div>
     </div>
   )
 }

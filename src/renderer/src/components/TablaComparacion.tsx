@@ -24,6 +24,7 @@ export default function TablaComparacion({ filas, base, actual, campos, enReport
   if (visibles.length === 0) return <p className="tenue">Estos controles no tienen datos para comparar.</p>
 
   return (
+    <div className="tabla-scroll">
     <table className="tabla comparacion">
       <thead>
         <tr>
@@ -64,5 +65,6 @@ export default function TablaComparacion({ filas, base, actual, campos, enReport
         })}
       </tbody>
     </table>
+    </div>
   )
 }

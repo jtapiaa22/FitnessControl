@@ -33,8 +33,7 @@ export default function Inicio() {
 
   return (
     <section>
-      <h1>Inicio</h1>
-      <h2>Les toca control</h2>
+      <h1>Controles pendientes</h1>
       {error && <p className="error">{error}</p>}
       {filas === null ? (
         <p className="tenue">Cargando…</p>
@@ -43,6 +42,7 @@ export default function Inicio() {
           Nadie tiene controles pendientes. <Link to="/alumnos">Ver alumnos</Link>
         </p>
       ) : (
+        <div className="tabla-scroll">
         <table className="tabla clicable">
           <thead>
             <tr>
@@ -69,6 +69,7 @@ export default function Inicio() {
             ))}
           </tbody>
         </table>
+        </div>
       )}
     </section>
   )

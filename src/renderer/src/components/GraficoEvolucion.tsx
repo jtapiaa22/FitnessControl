@@ -28,7 +28,9 @@ const GRILLA = '#e1e0d9'
 const EJE = '#c3c2b7'
 
 /** Evolución de una o más series de la misma unidad (nunca dos ejes Y). */
-export default function GraficoEvolucion({ titulo, unidad, decimales = 1, datos, series, marcar = [], ancho, alto = 240 }: Props) {
+export default function GraficoEvolucion({ titulo, unidad, decimales = 1, datos, series, marcar = [], ancho, alto = 320 }: Props) {
+  // En pantalla, texto más grande; en el PDF (ancho fijo), tamaño de impresión.
+  const texto = ancho ? 12 : 14
   const conDatos = series.filter((s) => datos.some((d) => typeof d[s.clave] === 'number'))
   if (conDatos.length === 0) return null
   const fmt = (v: number) => formatearNumero(v, decimales)
@@ -43,19 +45,19 @@ export default function GraficoEvolucion({ titulo, unidad, decimales = 1, datos,
       <Contenedor ancho={ancho} alto={alto}>
         <LineChart
           data={datos}
-          margin={{ top: 12, right: conDatos.length > 1 ? 120 : 48, bottom: 4, left: 0 }}
+          margin={{ top: 12, right: conDatos.length > 1 ? (ancho ? 120 : 140) : 56, bottom: 4, left: 0 }}
           {...(ancho ? { width: ancho, height: alto } : {})}
         >
           <CartesianGrid stroke={GRILLA} vertical={false} />
-          <XAxis dataKey="n" tickFormatter={(n) => formatearFecha(fechaDe(n)).slice(0, 5)} stroke={EJE} tick={{ fill: TINTA, fontSize: 12 }} tickLine={false} />
+          <XAxis dataKey="n" tickFormatter={(n) => formatearFecha(fechaDe(n)).slice(0, 5)} stroke={EJE} tick={{ fill: TINTA, fontSize: texto }} tickLine={false} />
           <YAxis
             domain={['auto', 'auto']}
             tickFormatter={fmt}
             stroke={EJE}
-            tick={{ fill: TINTA, fontSize: 12 }}
+            tick={{ fill: TINTA, fontSize: texto }}
             tickLine={false}
             axisLine={false}
-            width={48}
+            width={ancho ? 48 : 56}
           />
           {marcar.map((n) => (
             <ReferenceLine key={n} x={n} stroke={EJE} />
@@ -63,10 +65,10 @@ export default function GraficoEvolucion({ titulo, unidad, decimales = 1, datos,
           <Tooltip
             formatter={(v, nombre) => [`${fmt(Number(v))} ${unidad}`, nombre]}
             labelFormatter={(n) => `Control ${n} · ${formatearFecha(fechaDe(n))}`}
-            contentStyle={{ borderRadius: 8, borderColor: GRILLA, fontSize: 13 }}
+            contentStyle={{ borderRadius: 10, borderColor: GRILLA, fontSize: texto + 1 }}
             cursor={{ stroke: EJE }}
           />
-          {conDatos.length > 1 && <Legend iconType="plainline" wrapperStyle={{ fontSize: 12 }} formatter={(v) => <span style={{ color: TINTA }}>{v}</span>} />}
+          {conDatos.length > 1 && <Legend iconType="plainline" wrapperStyle={{ fontSize: texto }} formatter={(v) => <span style={{ color: TINTA }}>{v}</span>} />}
           {conDatos.map((s) => {
             const color = SERIES[series.indexOf(s)] ?? SERIES[0]
             const ultimo = ultimoIndice(s.clave)
@@ -77,8 +79,8 @@ export default function GraficoEvolucion({ titulo, unidad, decimales = 1, datos,
                 dataKey={s.clave}
                 name={s.nombre}
                 stroke={color}
-                strokeWidth={2}
-                dot={{ r: 4, fill: color, stroke: '#fff', strokeWidth: 2 }}
+                strokeWidth={ancho ? 2 : 2.5}
+                dot={{ r: ancho ? 4 : 5, fill: color, stroke: '#fff', strokeWidth: 2 }}
                 activeDot={{ r: 6, stroke: '#fff', strokeWidth: 2 }}
                 connectNulls
                 isAnimationActive={false}
@@ -88,7 +90,7 @@ export default function GraficoEvolucion({ titulo, unidad, decimales = 1, datos,
                   dataKey={s.clave}
                   content={({ x, y, value, index }) =>
                     index === ultimo && typeof value === 'number' ? (
-                      <text x={Number(x) + 10} y={Number(y)} dy={4} fill={TINTA} fontSize={12}>
+                      <text x={Number(x) + 10} y={Number(y)} dy={4} fill={TINTA} fontSize={texto}>
                         {conDatos.length > 1 ? `${s.nombre} ${fmt(value)}` : fmt(value)}
                       </text>
                     ) : null
