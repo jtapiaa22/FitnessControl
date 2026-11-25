@@ -45,6 +45,7 @@ function registrarIpc(): void {
   ipcMain.handle(CANALES.alumnosObtener, (_e, id: string) => repo.alumnos.obtener(id))
   ipcMain.handle(CANALES.alumnosCrear, (_e, datos) => repo.alumnos.crear(datos))
   ipcMain.handle(CANALES.alumnosActualizar, (_e, id: string, cambios) => repo.alumnos.actualizar(id, cambios))
+  ipcMain.handle(CANALES.alumnosEliminar, (_e, id: string) => repo.alumnos.eliminar(id))
   ipcMain.handle(CANALES.controlesListar, (_e, alumnoId: string) => repo.controles.listarPorAlumno(alumnoId))
   ipcMain.handle(CANALES.controlesCrear, (_e, datos) => repo.controles.crear(datos))
   ipcMain.handle(CANALES.controlesActualizar, (_e, id: string, cambios) => repo.controles.actualizar(id, cambios))

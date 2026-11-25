@@ -1,12 +1,13 @@
-import type { Alumno, AlumnoNuevo, Control, ControlNuevo } from './tipos'
+import type { Alumno, AlumnoConResumen, AlumnoNuevo, Control, ControlNuevo } from './tipos'
 
 /** API que el preload expone al renderer como `window.api`. */
 export interface FitnessApi {
   alumnos: {
-    listar(opciones?: { incluirArchivados?: boolean }): Promise<Alumno[]>
+    listar(opciones?: { incluirArchivados?: boolean }): Promise<AlumnoConResumen[]>
     obtener(id: string): Promise<Alumno | null>
     crear(datos: AlumnoNuevo): Promise<Alumno>
     actualizar(id: string, cambios: Partial<Omit<Alumno, 'id' | 'creadoEn' | 'actualizadoEn'>>): Promise<Alumno>
+    eliminar(id: string): Promise<void>
   }
   controles: {
     listarPorAlumno(alumnoId: string): Promise<Control[]>
@@ -22,6 +23,7 @@ export const CANALES = {
   alumnosObtener: 'alumnos:obtener',
   alumnosCrear: 'alumnos:crear',
   alumnosActualizar: 'alumnos:actualizar',
+  alumnosEliminar: 'alumnos:eliminar',
   controlesListar: 'controles:listarPorAlumno',
   controlesCrear: 'controles:crear',
   controlesActualizar: 'controles:actualizar',

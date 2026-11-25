@@ -1,55 +1,78 @@
-import { useEffect, useState, type FormEvent } from 'react'
-import type { Alumno } from '@shared/tipos'
+import { useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { estadoDeControl } from '@shared/controlPendiente'
+import { formatearFecha, hoyLocal } from '@shared/formato'
+import type { AlumnoConResumen } from '@shared/tipos'
+import EstadoControl from '../components/EstadoControl'
 
 export default function Alumnos() {
-  const [alumnos, setAlumnos] = useState<Alumno[]>([])
-  const [nombre, setNombre] = useState('')
+  const [alumnos, setAlumnos] = useState<AlumnoConResumen[]>([])
+  const [verArchivados, setVerArchivados] = useState(false)
+  const [busqueda, setBusqueda] = useState('')
   const [error, setError] = useState<string | null>(null)
-
-  const cargar = () => window.api.alumnos.listar().then(setAlumnos).catch((e: Error) => setError(e.message))
+  const navegar = useNavigate()
 
   useEffect(() => {
-    void cargar()
-  }, [])
+    window.api.alumnos
+      .listar({ incluirArchivados: verArchivados })
+      .then(setAlumnos)
+      .catch((e: Error) => setError(e.message))
+  }, [verArchivados])
 
-  async function agregar(e: FormEvent) {
-    e.preventDefault()
-    const n = nombre.trim()
-    if (!n) return
-    try {
-      await window.api.alumnos.crear({
-        nombre: n,
-        telefono: null,
-        fechaNacimiento: null,
-        sexo: null,
-        notas: null,
-        alturaM: null,
-        objetivo: 'mantener',
-        frecuenciaDias: 7
-      })
-      setNombre('')
-      await cargar()
-    } catch (err) {
-      setError((err as Error).message)
-    }
-  }
+  const hoy = hoyLocal()
+  const filtro = busqueda.trim().toLocaleLowerCase('es')
+  const visibles = alumnos.filter((a) => a.nombre.toLocaleLowerCase('es').includes(filtro))
 
   return (
     <section>
-      <h1>Alumnos</h1>
-      <form onSubmit={agregar} className="fila">
-        <input value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Nombre del alumno" />
-        <button type="submit">Agregar</button>
-      </form>
+      <div className="encabezado">
+        <h1>Alumnos</h1>
+        <Link className="boton" to="/alumnos/nuevo">
+          + Nuevo alumno
+        </Link>
+      </div>
+
+      <div className="fila">
+        <input placeholder="Buscar por nombre" value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
+        <label className="check">
+          <input type="checkbox" checked={verArchivados} onChange={(e) => setVerArchivados(e.target.checked)} />
+          Mostrar archivados
+        </label>
+      </div>
+
       {error && <p className="error">{error}</p>}
-      {alumnos.length === 0 ? (
-        <p className="tenue">Todavía no hay alumnos cargados.</p>
+
+      {visibles.length === 0 ? (
+        <p className="tenue">{alumnos.length === 0 ? 'Todavía no hay alumnos cargados.' : 'Ningún alumno coincide con la búsqueda.'}</p>
       ) : (
-        <ul className="lista">
-          {alumnos.map((a) => (
-            <li key={a.id}>{a.nombre}</li>
-          ))}
-        </ul>
+        <table className="tabla clicable">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Controles</th>
+              <th>Último control</th>
+              <th>Próximo control</th>
+            </tr>
+          </thead>
+          <tbody>
+            {visibles.map((a) => (
+              <tr key={a.id} onClick={() => navegar(`/alumnos/${a.id}`)}>
+                <td>
+                  {a.nombre} {a.archivado && <span className="etiqueta gris">Archivado</span>}
+                </td>
+                <td>{a.cantidadControles}</td>
+                <td>{formatearFecha(a.ultimoControl)}</td>
+                <td>
+                  {a.archivado ? (
+                    '—'
+                  ) : (
+                    <EstadoControl estado={estadoDeControl({ ultimoControl: a.ultimoControl, frecuenciaDias: a.frecuenciaDias, hoy })} />
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
     </section>
   )

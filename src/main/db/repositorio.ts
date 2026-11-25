@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import type Database from 'better-sqlite3'
-import type { Alumno, AlumnoNuevo, CampoReporte, Control, ControlNuevo } from '@shared/tipos'
+import type { Alumno, AlumnoConResumen, AlumnoNuevo, CampoReporte, Control, ControlNuevo } from '@shared/tipos'
 
 type Fila = Record<string, unknown>
 
@@ -63,11 +63,15 @@ export function crearRepositorio(db: Database.Database) {
 
   return {
     alumnos: {
-      listar({ incluirArchivados = false }: { incluirArchivados?: boolean } = {}): Alumno[] {
-        const sql = incluirArchivados
-          ? 'SELECT * FROM alumno ORDER BY nombre COLLATE NOCASE'
-          : 'SELECT * FROM alumno WHERE archivado = 0 ORDER BY nombre COLLATE NOCASE'
-        return (db.prepare(sql).all() as Fila[]).map(filaAAlumno)
+      listar({ incluirArchivados = false }: { incluirArchivados?: boolean } = {}): AlumnoConResumen[] {
+        const sql = `
+          SELECT a.*,
+                 (SELECT MAX(c.fecha) FROM control c WHERE c.alumno_id = a.id) AS ultimo_control,
+                 (SELECT COUNT(*) FROM control c WHERE c.alumno_id = a.id) AS cantidad_controles
+          FROM alumno a
+          ${incluirArchivados ? '' : 'WHERE a.archivado = 0'}
+          ORDER BY a.nombre COLLATE NOCASE`
+        return (db.prepare(sql).all() as Fila[]).map((f) => filaAAlumno(f) as AlumnoConResumen)
       },
       obtener: obtenerAlumno,
       crear(datos: AlumnoNuevo): Alumno {
@@ -82,6 +86,10 @@ export function crearRepositorio(db: Database.Database) {
         const a = obtenerAlumno(id)
         if (!a) throw new Error(`No existe el alumno ${id}`)
         return a
+      },
+      /** Borrado definitivo, con todos sus Controles. La UI pide doble confirmación. */
+      eliminar(id: string): void {
+        db.prepare('DELETE FROM alumno WHERE id = ?').run(id)
       }
     },
     controles: {

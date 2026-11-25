@@ -58,6 +58,13 @@ export interface Alumno {
   actualizadoEn: string
 }
 
+/** Alumno con datos resumidos de sus Controles, para listas. */
+export interface AlumnoConResumen extends Alumno {
+  /** Fecha del último Control (YYYY-MM-DD), o null si no tiene. */
+  ultimoControl: string | null
+  cantidadControles: number
+}
+
 export type AlumnoNuevo = Omit<Alumno, 'id' | 'creadoEn' | 'actualizadoEn' | 'archivado' | 'camposReporte'>
 
 /**

@@ -6,7 +6,8 @@ const api: FitnessApi = {
     listar: (opciones) => ipcRenderer.invoke(CANALES.alumnosListar, opciones),
     obtener: (id) => ipcRenderer.invoke(CANALES.alumnosObtener, id),
     crear: (datos) => ipcRenderer.invoke(CANALES.alumnosCrear, datos),
-    actualizar: (id, cambios) => ipcRenderer.invoke(CANALES.alumnosActualizar, id, cambios)
+    actualizar: (id, cambios) => ipcRenderer.invoke(CANALES.alumnosActualizar, id, cambios),
+    eliminar: (id) => ipcRenderer.invoke(CANALES.alumnosEliminar, id)
   },
   controles: {
     listarPorAlumno: (alumnoId) => ipcRenderer.invoke(CANALES.controlesListar, alumnoId),
