@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { EstadoActualizacion } from '@shared/api'
 import icono from '../assets/icono.png'
 import { mensajeDeError } from '../errores'
+import { NOVEDADES } from '../novedades'
 import { useActualizacion } from '../useActualizacion'
 
 function textoDeEstado(estado: EstadoActualizacion): string | null {
@@ -63,6 +64,16 @@ export default function AcercaDe() {
       <p className="tenue" style={{ marginBottom: 0 }}>
         La app busca versiones nuevas sola al abrirse y las descarga en segundo plano. Nunca se reinicia sin avisar.
       </p>
+      {NOVEDADES[0] && (
+        <div className="novedades">
+          <div className="novedades-titulo">Novedades de esta versión ({NOVEDADES[0].version})</div>
+          <ul>
+            {NOVEDADES[0].cambios.map((c) => (
+              <li key={c}>{c}</li>
+            ))}
+          </ul>
+        </div>
+      )}
     </fieldset>
   )
 }

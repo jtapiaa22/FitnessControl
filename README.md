@@ -31,7 +31,9 @@ Mismo esquema que KioscoApp: la app instalada se actualiza sola desde **GitHub R
    npm version patch --no-git-tag-version
    ```
 
-2. Publicala. Usa la variable de entorno `GH_TOKEN_FITNESSCONTROL` (o, si no existe, `GH_TOKEN`), con permiso **Contents: Read and write** sobre este repo:
+2. Agregá las novedades de la versión arriba de todo en `src/renderer/src/novedades.ts` (se muestran en Configuración → Acerca de).
+
+3. Publicala. Usa la variable de entorno `GH_TOKEN_FITNESSCONTROL` (o, si no existe, `GH_TOKEN`), con permiso **Contents: Read and write** sobre este repo:
 
    ```powershell
    npm run release
@@ -39,7 +41,7 @@ Mismo esquema que KioscoApp: la app instalada se actualiza sola desde **GitHub R
 
    Esto crea la release `v0.1.1` en GitHub con el instalador, su `.blockmap` y `latest.yml`.
 
-3. Hacé commit y push del cambio de versión.
+4. Hacé commit y push del cambio de versión.
 
 **Qué pasa en la compu de la instructora:**
 - La app busca versiones nuevas a los 15 segundos de abrirse y después cada 4 horas. La descarga sola, en segundo plano.

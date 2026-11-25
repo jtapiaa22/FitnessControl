@@ -214,6 +214,10 @@ button.whatsapp:hover { background: #1ebe5b; }
 .item-reporte-detalle { font-size: 0.875rem; color: var(--tenue); }
 
 /* ---------- Configuración ---------- */
+.novedades { margin-top: 1.25rem; padding: 1rem 1.25rem; background: #f3f8f5; border-radius: var(--radio-chico); }
+.novedades-titulo { font-weight: 600; margin-bottom: 0.375rem; }
+.novedades ul { margin: 0; padding-left: 1.25rem; }
+.novedades li { margin: 0.25rem 0; }
 .acerca { display: flex; align-items: center; gap: 1.25rem; }
 .acerca-icono { width: 4.5rem; height: 4.5rem; filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.15)); }
 .acerca-nombre { font-size: 1.375rem; font-weight: 700; letter-spacing: -0.012em; }
