@@ -31,7 +31,7 @@ Mismo esquema que KioscoApp: la app instalada se actualiza sola desde **GitHub R
    npm version patch --no-git-tag-version
    ```
 
-2. Publicala (usa la variable de entorno `GH_TOKEN`, con permiso de escritura sobre el repo):
+2. Publicala. Usa la variable de entorno `GH_TOKEN_FITNESSCONTROL` (o, si no existe, `GH_TOKEN`), con permiso **Contents: Read and write** sobre este repo:
 
    ```powershell
    npm run release
