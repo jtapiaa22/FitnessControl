@@ -4,6 +4,9 @@ import { masaGrasaKg } from '@shared/calculos'
 import { compararControles } from '@shared/comparacion'
 import { formatearFecha } from '@shared/formato'
 import type { Alumno, Control } from '@shared/tipos'
+import DetalleMedida from '../components/DetalleMedida'
+import FiguraMedidas, { type InteraccionFigura } from '../components/FiguraMedidas'
+import type { ZonaMedida } from '../components/siluetas'
 import GraficoEvolucion from '../components/GraficoEvolucion'
 import TablaComparacion from '../components/TablaComparacion'
 
@@ -17,6 +20,9 @@ export default function Comparacion() {
   const [alumno, setAlumno] = useState<Alumno | null>(null)
   const [controles, setControles] = useState<Control[] | null>(null)
   const [error, setError] = useState<string | null>(null)
+  // Zona del cuerpo bajo el mouse (se resalta en las dos siluetas) y zona elegida con un clic.
+  const [resaltada, setResaltada] = useState<ZonaMedida | null>(null)
+  const [elegida, setElegida] = useState<ZonaMedida | null>(null)
 
   useEffect(() => {
     Promise.all([window.api.alumnos.obtener(id), window.api.controles.listarPorAlumno(id)])
@@ -69,6 +75,14 @@ export default function Comparacion() {
   const elegir = (clave: 'base' | 'actual') => (e: React.ChangeEvent<HTMLSelectElement>) =>
     setParams({ base: String(indiceBase + 1), actual: String(indiceActual + 1), [clave]: e.target.value }, { replace: true })
 
+  const interaccion: InteraccionFigura = {
+    resaltada,
+    elegida,
+    alResaltar: setResaltada,
+    // Tocar la misma zona otra vez cierra el detalle.
+    alElegir: (zona) => setElegida((previa) => (previa === zona ? null : zona))
+  }
+
   const opciones = controles.map((c, i) => (
     <option key={c.id} value={i + 1}>
       Control {i + 1} · {formatearFecha(c.fecha)}
@@ -104,6 +118,27 @@ export default function Comparacion() {
       </div>
 
       <TablaComparacion filas={compararControles(base, actual)} base={base} actual={actual} />
+
+      <h2>Medidas en el cuerpo</h2>
+      <p className="tenue ayuda-figuras">Pasá el mouse por una parte del cuerpo para compararla, o tocala para ver su detalle.</p>
+      <div className="figuras">
+        <FiguraMedidas
+          titulo={`Control ${indiceBase + 1} · ${formatearFecha(base.fecha)}`}
+          control={base}
+          sexo={alumno.sexo}
+          interaccion={interaccion}
+        />
+        <FiguraMedidas
+          titulo={`Control ${indiceActual + 1} · ${formatearFecha(actual.fecha)}`}
+          control={actual}
+          sexo={alumno.sexo}
+          filas={compararControles(base, actual)}
+          interaccion={interaccion}
+        />
+      </div>
+      {elegida && (
+        <DetalleMedida zona={elegida} controles={controles} indiceBase={indiceBase} indiceActual={indiceActual} alCerrar={() => setElegida(null)} />
+      )}
 
       <h2>Evolución</h2>
       <div className="graficos">

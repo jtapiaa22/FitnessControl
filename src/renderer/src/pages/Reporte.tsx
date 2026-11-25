@@ -6,6 +6,7 @@ import { ETIQUETA_CAMPO } from '@shared/etiquetas'
 import { formatearFecha, formatearNumero, hoyLocal } from '@shared/formato'
 import { CAMPOS_REPORTE, DATOS_PUBLICOS, type Alumno, type CampoReporte, type Configuracion, type Control, type ReporteGuardado } from '@shared/tipos'
 import AccionesReporte from '../components/AccionesReporte'
+import FiguraMedidas from '../components/FiguraMedidas'
 import { mensajeDeError } from '../errores'
 import GraficoEvolucion, { type Serie } from '../components/GraficoEvolucion'
 import TablaComparacion from '../components/TablaComparacion'
@@ -14,6 +15,9 @@ const GRUPOS: { titulo: string; campos: CampoReporte[] }[] = [
   { titulo: 'Balanza', campos: ['peso', 'imc', 'grasaPct', 'masaGrasa', 'musculo', 'grasaVisceral', 'masaOsea', 'proteinaPct', 'metabolismoBasal'] },
   { titulo: 'Medidas', campos: ['pecho', 'cintura', 'cadera', 'muslo', 'brazoRelajado', 'brazoContraido'] }
 ]
+
+/** Medidas con cinta: si se eligió alguna, el Reporte muestra las siluetas. */
+const MEDIDAS: CampoReporte[] = ['pecho', 'cintura', 'cadera', 'muslo', 'brazoRelajado', 'brazoContraido']
 
 /** Datos destacados arriba del Reporte, si están elegidos. */
 const DESTACADOS: CampoReporte[] = ['peso', 'masaGrasa', 'musculo', 'cintura']
@@ -227,6 +231,23 @@ export default function Reporte() {
 
         <h2>Comparación</h2>
         <TablaComparacion filas={filas} base={base} actual={actual} campos={campos} enReporte />
+
+        {MEDIDAS.some((m) => campos.includes(m)) && (
+          <>
+            <h2>Medidas en el cuerpo</h2>
+            <div className="figuras">
+              <FiguraMedidas titulo={`Control ${indiceBase + 1} · ${formatearFecha(base.fecha)}`} control={base} sexo={alumno.sexo} campos={campos} paraImprimir />
+              <FiguraMedidas
+                titulo={`Control ${indiceActual + 1} · ${formatearFecha(actual.fecha)}`}
+                control={actual}
+                sexo={alumno.sexo}
+                filas={filas}
+                campos={campos}
+                paraImprimir
+              />
+            </div>
+          </>
+        )}
 
         {(campos.includes('peso') || seriesComposicion.length > 0 || seriesMedidas.length > 0) && <h2>Evolución</h2>}
         <div className="hoja-graficos">

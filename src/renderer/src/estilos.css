@@ -207,6 +207,62 @@ legend + * { clear: both; }
 
 .derecha-auto { order: 99; margin-left: auto; }
 
+/* ---------- Medidas en el cuerpo ---------- */
+.figuras { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 28rem), 1fr)); gap: 1.25rem; }
+.figura-medidas { margin: 0; background: var(--superficie); border-radius: var(--radio); box-shadow: var(--sombra); padding: 1.25rem 1rem 0.5rem; min-width: 0; }
+.figura-medidas figcaption { font-size: 1.125rem; font-weight: 700; letter-spacing: -0.01em; margin: 0 0 0.25rem 0.75rem; }
+.figura-medidas svg { display: block; width: 100%; height: auto; }
+.figura-medidas .guia { stroke: #3a4a42; stroke-width: 1.5; }
+.figura-medidas .punto { fill: var(--acento); stroke: #fff; stroke-width: 1.5; }
+.figura-medidas .medida-nombre { font-size: 13px; font-weight: 600; fill: var(--tenue); }
+.figura-medidas .medida-valor { font-size: 16px; font-weight: 700; fill: var(--texto); font-variant-numeric: tabular-nums; }
+.figura-medidas .medida-detalle { font-size: 12px; font-weight: 500; fill: var(--tenue); }
+.figura-medidas .medida-dif { font-size: 13px; fill: var(--texto); font-variant-numeric: tabular-nums; }
+.figura-medidas .medida-dif .flecha { font-size: 10px; }
+.figura-medidas .medida-dif.sube .flecha { fill: #2a78d6; }
+.figura-medidas .medida-dif.baja .flecha { fill: #eb6834; }
+.figura-medidas .medida-dif.igual .flecha { fill: var(--tenue); }
+
+/* Siluetas interactivas (Comparación): resaltar al pasar el mouse, elegir con un clic. */
+.ayuda-figuras { margin: -0.5rem 0 1rem; }
+.figura-medidas .area { fill: transparent; }
+.figura-medidas.interactiva .area { cursor: pointer; transition: fill 120ms ease-out; }
+.figura-medidas .area.resaltada { fill: rgba(26, 158, 107, 0.16); }
+.figura-medidas .area.elegida { fill: rgba(26, 158, 107, 0.26); stroke: var(--acento); stroke-width: 1.5; }
+.figura-medidas .area-etiqueta { fill: transparent; }
+.figura-medidas.interactiva .zona { cursor: pointer; outline: none; transition: opacity 140ms ease-out; }
+.figura-medidas .zona:focus-visible .area-etiqueta { stroke: var(--acento); stroke-width: 2; }
+.figura-medidas .zona .textos { transform-box: fill-box; transition: transform 140ms ease-out; }
+.figura-medidas .zona .textos.a-la-izquierda { transform-origin: right center; }
+.figura-medidas .zona .textos.a-la-derecha { transform-origin: left center; }
+.figura-medidas .zona.resaltada .textos, .figura-medidas .zona.elegida .textos { transform: scale(1.16); }
+.figura-medidas .zona.resaltada .guia, .figura-medidas .zona.elegida .guia { stroke: var(--acento); stroke-width: 2.5; }
+.figura-medidas .zona.resaltada .punto, .figura-medidas .zona.elegida .punto { r: 6; }
+.figura-medidas .zona.resaltada .medida-nombre, .figura-medidas .zona.elegida .medida-nombre { fill: var(--acento); }
+/* Mientras se resalta una zona, las demás se atenúan para que se lea la comparación. */
+.figuras:has(.zona.resaltada) .zona:not(.resaltada):not(.elegida) { opacity: 0.4; }
+
+.detalle-medida { margin-top: 1.25rem; background: var(--superficie); border-radius: var(--radio); box-shadow: var(--sombra); padding: 1.25rem 1.5rem 1.5rem; }
+.detalle-medida .encabezado { margin-bottom: 1rem; }
+.detalle-medida h3 { margin: 0; font-size: 1.375rem; font-weight: 700; letter-spacing: -0.012em; }
+.detalle-cuerpo { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 1.25rem; align-items: start; }
+.detalle-medida .tabla-scroll, .detalle-medida .grafico { box-shadow: none; border: 1px solid var(--separador); }
+.detalle-medida .tabla th, .detalle-medida .tabla td { white-space: nowrap; padding: 0.875rem 1rem; }
+@media (max-width: 1100px) { .detalle-cuerpo { grid-template-columns: minmax(0, 1fr); } }
+@media (prefers-reduced-motion: reduce) {
+  .figura-medidas .zona .textos, .figura-medidas .area, .figura-medidas .zona { transition: none; }
+}
+
+/* Siluetas dentro de la hoja del Reporte (tamaños de impresión). */
+.hoja .figuras { grid-template-columns: 1fr 1fr; gap: 12px; }
+.hoja .figura-medidas { box-shadow: none; border: 1px solid #dde5e0; border-radius: 8px; padding: 10px 4px 0; break-inside: avoid; }
+.hoja .figura-medidas figcaption { font-size: 13px; margin: 0 0 0 8px; }
+.figura-medidas.imprimir .medida-nombre { font-size: 17px; }
+.figura-medidas.imprimir .medida-valor { font-size: 20px; }
+.figura-medidas.imprimir .medida-detalle { font-size: 15px; }
+.figura-medidas.imprimir .medida-dif { font-size: 17px; }
+.figura-medidas.imprimir .medida-dif .flecha { font-size: 13px; }
+
 /* ---------- Actualizaciones ---------- */
 .aviso-actualizacion { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin: -0.5rem 0 1.5rem; padding: 0.75rem 1rem 0.75rem 1.25rem; background: #e7f1fd; border-radius: var(--radio); color: #0b3d75; }
 .aviso-actualizacion span { flex: 1 1 20rem; }
