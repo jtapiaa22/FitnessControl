@@ -1,0 +1,24 @@
+:root {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  color: #1f2a24;
+  background: #f5f7f6;
+  --acento: #1a9e6b;
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+.app { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
+.barra { background: #12382a; color: #fff; padding: 20px 12px; }
+.marca { font-weight: 700; font-size: 18px; margin: 0 8px 24px; }
+.barra nav { display: flex; flex-direction: column; gap: 4px; }
+.barra a { color: #cfe7dc; text-decoration: none; padding: 8px 10px; border-radius: 6px; }
+.barra a.active, .barra a:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.contenido { padding: 28px 36px; }
+h1 { margin-top: 0; font-size: 24px; }
+.tenue { color: #6b7a72; }
+.error { color: #b3261e; }
+.fila { display: flex; gap: 8px; margin-bottom: 16px; }
+input { padding: 8px 10px; border: 1px solid #c8d3cd; border-radius: 6px; font: inherit; min-width: 280px; }
+button { padding: 8px 14px; border: 0; border-radius: 6px; background: var(--acento); color: #fff; font: inherit; cursor: pointer; }
+.lista { list-style: none; padding: 0; margin: 0; background: #fff; border-radius: 8px; border: 1px solid #e1e8e4; }
+.lista li { padding: 10px 14px; border-bottom: 1px solid #eef2f0; }
+.lista li:last-child { border-bottom: 0; }
