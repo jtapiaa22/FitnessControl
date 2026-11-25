@@ -1,4 +1,5 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
+import AcercaDe from '../components/AcercaDe'
 import CopiasDeSeguridad from '../components/CopiasDeSeguridad'
 
 const TAMANO_MAXIMO_LOGO = 1_500_000
@@ -80,6 +81,9 @@ export default function Configuracion() {
       </form>
       <div style={{ maxWidth: 880, marginTop: '1.5rem' }}>
         <CopiasDeSeguridad />
+      </div>
+      <div style={{ maxWidth: 880, marginTop: '1.5rem' }}>
+        <AcercaDe />
       </div>
     </section>
   )

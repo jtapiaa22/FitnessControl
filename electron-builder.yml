@@ -1,7 +1,7 @@
 # Instalador de Windows. Se genera con: npm run instalador
-appId: com.fitnesscontrol.app
+appId: com.tadevstudio.fitnesscontrol
 productName: FitnessControl
-copyright: FitnessControl
+copyright: © 2026 TADevStudio
 directories:
   buildResources: build
   output: release/${version}
@@ -19,6 +19,8 @@ win:
     - target: nsis
       arch: [x64]
   icon: build/icon.ico
+  # Aparece en las propiedades del .exe y en "Aplicaciones instaladas".
+  legalTrademarks: FitnessControl es un producto de TADevStudio
 nsis:
   oneClick: false
   perMachine: false

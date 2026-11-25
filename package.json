@@ -1,9 +1,11 @@
 {
   "name": "fitness-control",
   "version": "0.1.0",
-  "description": "Control de mediciones y progreso de alumnas",
+  "description": "FitnessControl: control de mediciones y progreso de alumnos. Desarrollado por TADevStudio.",
   "main": "./out/main/index.js",
-  "author": "Jorge",
+  "author": {
+    "name": "TADevStudio"
+  },
   "private": true,
   "type": "module",
   "scripts": {

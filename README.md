@@ -30,8 +30,21 @@ El instalador queda en `release\<versión>\FitnessControl-Setup-<versión>.exe`,
 
 - Para una versión nueva, subí el número de `"version"` en `package.json` antes de generar el instalador.
 - Instalar una versión nueva encima de la anterior **no borra los datos**, y desinstalar tampoco.
-- El instalador no está firmado digitalmente. La primera vez, Windows puede mostrar "Windows protegió su PC": se instala con **Más información → Ejecutar de todas formas**.
+- El instalador no está firmado digitalmente. La primera vez, Windows puede mostrar "Windows protegió su PC": se instala con **Más información → Ejecutar de todas formas**. Ver "Firma digital" más abajo.
 - El ícono sale de `build/icon.ico` (y `build/icon.png`). Para cambiarlo, reemplazá esos archivos.
+
+## Autoría
+
+FitnessControl es un producto de **TADevStudio**. Figura como empresa y copyright en las propiedades del `.exe` y del instalador (`package.json` → `author`, `electron-builder.yml` → `copyright`), y en la app (barra lateral y Configuración → Acerca de).
+
+## Firma digital (pendiente)
+
+Sin firma, Windows muestra "Editor desconocido". Para que muestre "TADevStudio" hace falta un certificado de firma de código a nombre de TADevStudio:
+
+- **Certificado OV** de una autoridad certificante (SSL.com, Sectigo, DigiCert, etc.): unos US$ 150 a 450 por año. Exige validar la identidad de la empresa o persona, y desde 2023 la clave va en un token físico o en la nube del proveedor. Desde 2026 dura como máximo unos 15 meses.
+- **Azure Artifact Signing** (ex Trusted Signing, US$ 9,99 por mes): por ahora solo para personas de EE. UU. o Canadá y empresas de EE. UU., Canadá, UE y Reino Unido.
+
+Con el certificado, `electron-builder` firma solo: se configura en `electron-builder.yml` (sección `win.signtoolOptions`, o `win.azureSignOptions` para Azure) y se vuelve a correr `npm run instalador`. Aun firmado, SmartScreen puede avisar al principio hasta que el certificado gana reputación con las descargas.
 
 ## Dónde están los datos
 

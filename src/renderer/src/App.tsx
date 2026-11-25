@@ -55,6 +55,9 @@ export default function App() {
             <span>Configuración</span>
           </NavLink>
         </nav>
+        <div className="firma" title={`FitnessControl ${__VERSION__}`}>
+          Desarrollado por <strong>TADevStudio</strong>
+        </div>
       </aside>
       <main className="contenido">
         <Routes>
