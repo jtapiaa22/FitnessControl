@@ -18,6 +18,9 @@ interface Props {
   series: Serie[]
   /** Números de los dos Controles comparados, marcados con una línea vertical. */
   marcar?: number[]
+  /** Tamaño fijo en px (para el PDF). Sin ancho, el gráfico ocupa el contenedor. */
+  ancho?: number
+  alto?: number
 }
 
 const TINTA = '#52514e'
@@ -25,7 +28,7 @@ const GRILLA = '#e1e0d9'
 const EJE = '#c3c2b7'
 
 /** Evolución de una o más series de la misma unidad (nunca dos ejes Y). */
-export default function GraficoEvolucion({ titulo, unidad, decimales = 1, datos, series, marcar = [] }: Props) {
+export default function GraficoEvolucion({ titulo, unidad, decimales = 1, datos, series, marcar = [], ancho, alto = 240 }: Props) {
   const conDatos = series.filter((s) => datos.some((d) => typeof d[s.clave] === 'number'))
   if (conDatos.length === 0) return null
   const fmt = (v: number) => formatearNumero(v, decimales)
@@ -37,8 +40,12 @@ export default function GraficoEvolucion({ titulo, unidad, decimales = 1, datos,
       <figcaption>
         {titulo} <span className="tenue">({unidad})</span>
       </figcaption>
-      <ResponsiveContainer width="100%" height={240}>
-        <LineChart data={datos} margin={{ top: 12, right: conDatos.length > 1 ? 120 : 48, bottom: 4, left: 0 }}>
+      <Contenedor ancho={ancho} alto={alto}>
+        <LineChart
+          data={datos}
+          margin={{ top: 12, right: conDatos.length > 1 ? 120 : 48, bottom: 4, left: 0 }}
+          {...(ancho ? { width: ancho, height: alto } : {})}
+        >
           <CartesianGrid stroke={GRILLA} vertical={false} />
           <XAxis dataKey="n" tickFormatter={(n) => formatearFecha(fechaDe(n)).slice(0, 5)} stroke={EJE} tick={{ fill: TINTA, fontSize: 12 }} tickLine={false} />
           <YAxis
@@ -91,7 +98,11 @@ export default function GraficoEvolucion({ titulo, unidad, decimales = 1, datos,
             )
           })}
         </LineChart>
-      </ResponsiveContainer>
+      </Contenedor>
     </figure>
   )
+}
+
+function Contenedor({ ancho, alto, children }: { ancho?: number; alto: number; children: React.ReactElement }) {
+  return ancho ? children : <ResponsiveContainer width="100%" height={alto}>{children}</ResponsiveContainer>
 }

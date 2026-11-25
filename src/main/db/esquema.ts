@@ -53,6 +53,13 @@ const MIGRACIONES: string[] = [
   );
 
   CREATE INDEX control_alumno_fecha ON control (alumno_id, fecha);
+  `,
+  `
+  CREATE TABLE configuracion (
+    clave           TEXT PRIMARY KEY,
+    valor           TEXT,
+    actualizado_en  TEXT NOT NULL
+  );
   `
 ]
 

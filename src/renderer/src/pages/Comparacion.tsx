@@ -93,6 +93,9 @@ export default function Comparacion() {
             {opciones}
           </select>
         </label>
+        <Link className="boton derecha-auto" to={`/alumnos/${id}/reporte?base=${indiceBase + 1}&actual=${indiceActual + 1}`}>
+          Armar reporte PDF
+        </Link>
         {indiceBase !== n - 2 || indiceActual !== n - 1 ? (
           <button className="secundario chico" onClick={() => setParams({}, { replace: true })}>
             Último contra anterior

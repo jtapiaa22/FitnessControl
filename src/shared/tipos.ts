@@ -103,3 +103,12 @@ export interface Control {
 }
 
 export type ControlNuevo = Omit<Control, 'id' | 'creadoEn' | 'actualizadoEn'>
+
+/** Datos de la Instructora que encabezan el Reporte. */
+export interface Configuracion {
+  nombreInstructora: string | null
+  /** Instagram, WhatsApp o lo que quiera mostrar. */
+  contacto: string | null
+  /** Logo como data URL (image/png o image/jpeg). */
+  logo: string | null
+}

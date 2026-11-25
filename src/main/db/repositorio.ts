@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import type Database from 'better-sqlite3'
-import type { Alumno, AlumnoConResumen, AlumnoNuevo, CampoReporte, Control, ControlNuevo } from '@shared/tipos'
+import type { Alumno, AlumnoConResumen, AlumnoNuevo, Configuracion, CampoReporte, Control, ControlNuevo } from '@shared/tipos'
 
 type Fila = Record<string, unknown>
 
@@ -90,6 +90,23 @@ export function crearRepositorio(db: Database.Database) {
       /** Borrado definitivo, con todos sus Controles. La UI pide doble confirmación. */
       eliminar(id: string): void {
         db.prepare('DELETE FROM alumno WHERE id = ?').run(id)
+      }
+    },
+    configuracion: {
+      obtener(): Configuracion {
+        const filas = db.prepare('SELECT clave, valor FROM configuracion').all() as { clave: string; valor: string | null }[]
+        const m = new Map(filas.map((f) => [f.clave, f.valor]))
+        return { nombreInstructora: m.get('nombreInstructora') ?? null, contacto: m.get('contacto') ?? null, logo: m.get('logo') ?? null }
+      },
+      guardar(cambios: Partial<Configuracion>): Configuracion {
+        const stmt = db.prepare(
+          'INSERT INTO configuracion (clave, valor, actualizado_en) VALUES (?, ?, ?) ON CONFLICT(clave) DO UPDATE SET valor = excluded.valor, actualizado_en = excluded.actualizado_en'
+        )
+        const permitidas: (keyof Configuracion)[] = ['nombreInstructora', 'contacto', 'logo']
+        db.transaction(() => {
+          for (const clave of permitidas) if (clave in cambios) stmt.run(clave, cambios[clave] ?? null, ahora())
+        })()
+        return this.obtener()
       }
     },
     controles: {

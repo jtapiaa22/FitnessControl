@@ -14,6 +14,15 @@ const api: FitnessApi = {
     crear: (datos) => ipcRenderer.invoke(CANALES.controlesCrear, datos),
     actualizar: (id, cambios) => ipcRenderer.invoke(CANALES.controlesActualizar, id, cambios),
     eliminar: (id) => ipcRenderer.invoke(CANALES.controlesEliminar, id)
+  },
+  configuracion: {
+    obtener: () => ipcRenderer.invoke(CANALES.configuracionObtener),
+    guardar: (cambios) => ipcRenderer.invoke(CANALES.configuracionGuardar, cambios)
+  },
+  reporte: {
+    guardarPdf: (nombre) => ipcRenderer.invoke(CANALES.reporteGuardarPdf, nombre),
+    abrir: (ruta) => ipcRenderer.invoke(CANALES.reporteAbrir, ruta),
+    mostrarEnCarpeta: (ruta) => ipcRenderer.invoke(CANALES.reporteMostrar, ruta)
   }
 }
 

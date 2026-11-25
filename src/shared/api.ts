@@ -1,4 +1,4 @@
-import type { Alumno, AlumnoConResumen, AlumnoNuevo, Control, ControlNuevo } from './tipos'
+import type { Alumno, AlumnoConResumen, AlumnoNuevo, Configuracion, Control, ControlNuevo } from './tipos'
 
 /** API que el preload expone al renderer como `window.api`. */
 export interface FitnessApi {
@@ -15,6 +15,16 @@ export interface FitnessApi {
     actualizar(id: string, cambios: Partial<Omit<Control, 'id' | 'alumnoId' | 'creadoEn' | 'actualizadoEn'>>): Promise<Control>
     eliminar(id: string): Promise<void>
   }
+  configuracion: {
+    obtener(): Promise<Configuracion>
+    guardar(cambios: Partial<Configuracion>): Promise<Configuracion>
+  }
+  reporte: {
+    /** Imprime la pantalla actual (con estilos @media print) a PDF y pide dónde guardarlo. null si cancela. */
+    guardarPdf(nombreSugerido: string): Promise<string | null>
+    abrir(ruta: string): Promise<void>
+    mostrarEnCarpeta(ruta: string): Promise<void>
+  }
 }
 
 /** Nombres de canales IPC, compartidos entre main y preload. */
@@ -27,5 +37,10 @@ export const CANALES = {
   controlesListar: 'controles:listarPorAlumno',
   controlesCrear: 'controles:crear',
   controlesActualizar: 'controles:actualizar',
-  controlesEliminar: 'controles:eliminar'
+  controlesEliminar: 'controles:eliminar',
+  configuracionObtener: 'configuracion:obtener',
+  configuracionGuardar: 'configuracion:guardar',
+  reporteGuardarPdf: 'reporte:guardarPdf',
+  reporteAbrir: 'reporte:abrir',
+  reporteMostrar: 'reporte:mostrarEnCarpeta'
 } as const

@@ -1,12 +1,16 @@
 import type { FilaComparacion } from '@shared/comparacion'
 import { ETIQUETA_CAMPO } from '@shared/etiquetas'
 import { formatearFecha, formatearNumero } from '@shared/formato'
-import { DATOS_PUBLICOS, type Control } from '@shared/tipos'
+import { DATOS_PUBLICOS, type CampoReporte, type Control } from '@shared/tipos'
 
 interface Props {
   filas: FilaComparacion[]
   base: Control
   actual: Control
+  /** Si se indica, solo se muestran estos campos (los elegidos para el Reporte). */
+  campos?: readonly CampoReporte[]
+  /** En el Reporte no se muestra la marca "solo vos". */
+  enReporte?: boolean
 }
 
 const LADO = { izq: ' (izq.)', der: ' (der.)' } as const
@@ -15,8 +19,8 @@ const LADO = { izq: ' (izq.)', der: ' (der.)' } as const
  * Tabla "antes / ahora / diferencia". El color de la flecha solo indica si el
  * valor subió o bajó: no juzga si es bueno o malo (ver GLOSSARY.md, "Cambio").
  */
-export default function TablaComparacion({ filas, base, actual }: Props) {
-  const visibles = filas.filter((f) => f.base !== null || f.actual !== null)
+export default function TablaComparacion({ filas, base, actual, campos, enReporte }: Props) {
+  const visibles = filas.filter((f) => (f.base !== null || f.actual !== null) && (!campos || campos.includes(f.campo)))
   if (visibles.length === 0) return <p className="tenue">Estos controles no tienen datos para comparar.</p>
 
   return (
@@ -38,7 +42,7 @@ export default function TablaComparacion({ filas, base, actual }: Props) {
               <td>
                 {nombre}
                 {f.lado ? LADO[f.lado] : ''}
-                {!DATOS_PUBLICOS.includes(f.campo) && <span className="etiqueta gris privado">solo vos</span>}
+                {!enReporte && !DATOS_PUBLICOS.includes(f.campo) && <span className="etiqueta gris privado">solo vos</span>}
               </td>
               <td className="num">{valor(f.base)}</td>
               <td className="num">{valor(f.actual)}</td>
