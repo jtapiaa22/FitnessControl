@@ -60,6 +60,22 @@ const MIGRACIONES: string[] = [
     valor           TEXT,
     actualizado_en  TEXT NOT NULL
   );
+  `,
+  `
+  -- Historial de Reportes: uno por cada par de Controles comparados.
+  -- Generar de nuevo el mismo par reemplaza el registro (y el archivo).
+  CREATE TABLE reporte (
+    id                 TEXT PRIMARY KEY,
+    alumno_id          TEXT NOT NULL REFERENCES alumno(id) ON DELETE CASCADE,
+    control_base_id    TEXT NOT NULL REFERENCES control(id) ON DELETE CASCADE,
+    control_actual_id  TEXT NOT NULL REFERENCES control(id) ON DELETE CASCADE,
+    ruta               TEXT NOT NULL,
+    campos             TEXT NOT NULL,
+    nota               TEXT,
+    creado_en          TEXT NOT NULL,
+    actualizado_en     TEXT NOT NULL,
+    UNIQUE (alumno_id, control_base_id, control_actual_id)
+  );
   `
 ]
 

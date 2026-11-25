@@ -1,4 +1,4 @@
-import type { Alumno, AlumnoConResumen, AlumnoNuevo, Configuracion, Control, ControlNuevo } from './tipos'
+import type { Alumno, AlumnoConResumen, AlumnoNuevo, CampoReporte, Configuracion, Control, ControlNuevo, ReporteGuardado } from './tipos'
 
 /** API que el preload expone al renderer como `window.api`. */
 export interface FitnessApi {
@@ -33,10 +33,26 @@ export interface FitnessApi {
     restaurar(ruta: string): Promise<void>
   }
   reporte: {
-    /** Imprime la pantalla actual (con estilos @media print) a PDF y pide dónde guardarlo. null si cancela. */
-    guardarPdf(nombreSugerido: string): Promise<string | null>
-    abrir(ruta: string): Promise<void>
-    mostrarEnCarpeta(ruta: string): Promise<void>
+    /**
+     * Imprime la pantalla actual (estilos @media print) a PDF y lo guarda en el historial.
+     * La primera vez para un par de Controles pregunta dónde guardarlo; si ya existía,
+     * reemplaza el mismo archivo sin preguntar. null si se cancela.
+     */
+    guardarPdf(datos: {
+      alumnoId: string
+      controlBaseId: string
+      controlActualId: string
+      campos: CampoReporte[]
+      nota: string | null
+      nombreSugerido: string
+    }): Promise<{ reporte: ReporteGuardado; reemplazado: boolean } | null>
+    historial(alumnoId: string): Promise<ReporteGuardado[]>
+    abrir(id: string): Promise<void>
+    mostrarEnCarpeta(id: string): Promise<void>
+    /** Copia el PDF al portapapeles y abre WhatsApp en el chat del Alumno. */
+    enviarPorWhatsApp(id: string): Promise<{ conTelefono: boolean; destino: 'escritorio' | 'web' }>
+    /** Quita el Reporte del historial; el PDF queda en la compu. */
+    quitar(id: string): Promise<void>
   }
 }
 
@@ -60,6 +76,9 @@ export const CANALES = {
   backupElegirCopia: 'backup:elegirCopia',
   backupRestaurar: 'backup:restaurar',
   reporteGuardarPdf: 'reporte:guardarPdf',
+  reporteHistorial: 'reporte:historial',
   reporteAbrir: 'reporte:abrir',
-  reporteMostrar: 'reporte:mostrarEnCarpeta'
+  reporteMostrar: 'reporte:mostrarEnCarpeta',
+  reporteWhatsApp: 'reporte:enviarPorWhatsApp',
+  reporteQuitar: 'reporte:quitar'
 } as const

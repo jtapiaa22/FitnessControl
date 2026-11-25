@@ -104,6 +104,23 @@ export interface Control {
 
 export type ControlNuevo = Omit<Control, 'id' | 'creadoEn' | 'actualizadoEn'>
 
+/** Un Reporte generado (historial). Hay uno por cada par de Controles comparados. */
+export interface ReporteGuardado {
+  id: string
+  alumnoId: string
+  controlBaseId: string
+  controlActualId: string
+  /** Fechas de los dos Controles (YYYY-MM-DD). */
+  fechaBase: string
+  fechaActual: string
+  /** Dónde quedó el PDF en la compu. */
+  ruta: string
+  campos: CampoReporte[]
+  nota: string | null
+  creadoEn: string
+  actualizadoEn: string
+}
+
 /** Datos de la Instructora que encabezan el Reporte. */
 export interface Configuracion {
   nombreInstructora: string | null

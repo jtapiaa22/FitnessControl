@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import type Database from 'better-sqlite3'
-import type { Alumno, AlumnoConResumen, AlumnoNuevo, Configuracion, CampoReporte, Control, ControlNuevo } from '@shared/tipos'
+import type { Alumno, AlumnoConResumen, AlumnoNuevo, Configuracion, ReporteGuardado, CampoReporte, Control, ControlNuevo } from '@shared/tipos'
 
 type Fila = Record<string, unknown>
 
@@ -51,6 +51,17 @@ function actualizarFila(db: Database.Database, tabla: string, id: string, params
   db.prepare(`UPDATE ${tabla} SET ${cols.map((c) => `${c} = @${c}`).join(', ')} WHERE id = @id`).run({ ...params, id })
 }
 
+const SQL_REPORTE = `
+  SELECT r.*, cb.fecha AS fecha_base, ca.fecha AS fecha_actual
+  FROM reporte r
+  JOIN control cb ON cb.id = r.control_base_id
+  JOIN control ca ON ca.id = r.control_actual_id`
+
+function filaAReporte(f: Fila): ReporteGuardado {
+  const o = Object.fromEntries(Object.entries(f).map(([k, v]) => [aCamel(k), v])) as Record<string, unknown>
+  return { ...(o as unknown as ReporteGuardado), campos: JSON.parse(o.campos as string) as CampoReporte[] }
+}
+
 export function crearRepositorio(db: Database.Database) {
   const obtenerAlumno = (id: string): Alumno | null => {
     const f = db.prepare('SELECT * FROM alumno WHERE id = ?').get(id) as Fila | undefined
@@ -90,6 +101,36 @@ export function crearRepositorio(db: Database.Database) {
       /** Borrado definitivo, con todos sus Controles. La UI pide doble confirmación. */
       eliminar(id: string): void {
         db.prepare('DELETE FROM alumno WHERE id = ?').run(id)
+      }
+    },
+    reportes: {
+      listarPorAlumno(alumnoId: string): ReporteGuardado[] {
+        return (db.prepare(`${SQL_REPORTE} WHERE r.alumno_id = ? ORDER BY r.actualizado_en DESC`).all(alumnoId) as Fila[]).map(filaAReporte)
+      },
+      obtener(id: string): ReporteGuardado | null {
+        const f = db.prepare(`${SQL_REPORTE} WHERE r.id = ?`).get(id) as Fila | undefined
+        return f ? filaAReporte(f) : null
+      },
+      buscarPar(alumnoId: string, controlBaseId: string, controlActualId: string): ReporteGuardado | null {
+        const f = db
+          .prepare(`${SQL_REPORTE} WHERE r.alumno_id = ? AND r.control_base_id = ? AND r.control_actual_id = ?`)
+          .get(alumnoId, controlBaseId, controlActualId) as Fila | undefined
+        return f ? filaAReporte(f) : null
+      },
+      /** Guarda el Reporte; si ya había uno del mismo par de Controles, lo reemplaza. */
+      guardar(datos: { alumnoId: string; controlBaseId: string; controlActualId: string; ruta: string; campos: CampoReporte[]; nota: string | null }): ReporteGuardado {
+        const t = ahora()
+        db.prepare(
+          `INSERT INTO reporte (id, alumno_id, control_base_id, control_actual_id, ruta, campos, nota, creado_en, actualizado_en)
+           VALUES (@id, @alumnoId, @controlBaseId, @controlActualId, @ruta, @campos, @nota, @t, @t)
+           ON CONFLICT (alumno_id, control_base_id, control_actual_id)
+           DO UPDATE SET ruta = excluded.ruta, campos = excluded.campos, nota = excluded.nota, actualizado_en = excluded.actualizado_en`
+        ).run({ ...datos, id: randomUUID(), campos: JSON.stringify(datos.campos), t })
+        return this.buscarPar(datos.alumnoId, datos.controlBaseId, datos.controlActualId)!
+      },
+      /** Quita el Reporte del historial (el archivo PDF no se toca). */
+      quitar(id: string): void {
+        db.prepare('DELETE FROM reporte WHERE id = ?').run(id)
       }
     },
     configuracion: {

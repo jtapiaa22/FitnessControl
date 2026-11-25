@@ -80,7 +80,9 @@ Los términos están definidos en `GLOSSARY.md`.
 - El Reporte es un PDF con encabezado de la Instructora (nombre, logo y contacto opcional), datos del Alumno, una tabla con los dos Controles y la diferencia, gráficos de evolución y la Nota del reporte.
 - Casillas para elegir qué datos van: la primera vez se marcan los Datos públicos, y después se recuerda la última selección de cada Alumno.
 - Colores de las diferencias: solo muestran si el valor subió, bajó o quedó igual, sin juzgar si es bueno o malo (lo interpreta la Instructora). Los colores exactos los define ella más adelante. *(Cambio del 25/11/2026: reemplaza los colores según el Objetivo.)*
-- Los PDF no se guardan en la app. La Nota del reporte sí se guarda con el Control.
+- La Nota del reporte se guarda con el Control.
+- *(Cambio del 25/11/2026)* Cada PDF generado queda en el **historial de reportes** del alumno, uno por cada par de controles. Generar de nuevo el mismo par **reemplaza** el archivo, sin volver a preguntar dónde guardarlo. La primera vez se sugiere Documentos\FitnessControl\Reportes\<Alumno>.
+- **Enviar por WhatsApp:** copia el PDF al portapapeles y abre el chat del alumno (WhatsApp de escritorio o, si no está, WhatsApp Web) con un mensaje listo. La instructora pega con Ctrl+V y envía. WhatsApp no permite adjuntar archivos de forma automática.
 
 **Backup**
 - Copia automática al cerrar la app, una por día, en una carpeta elegible (por ejemplo, Google Drive). Por defecto: Documentos\FitnessControl\Copias. Se conservan las últimas 30.

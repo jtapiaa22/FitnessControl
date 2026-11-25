@@ -199,6 +199,16 @@ legend + * { clear: both; }
 
 .derecha-auto { order: 99; margin-left: auto; }
 
+/* ---------- Reportes ---------- */
+.acciones-reporte { display: flex; flex-direction: column; gap: 0.625rem; }
+button.whatsapp { background: #25d366; color: #fff; }
+button.whatsapp:hover { background: #1ebe5b; }
+.aviso-ok { margin: 0; padding: 0.625rem 0.875rem; background: #e8f6ef; border-radius: var(--radio-chico); font-size: 0.9375rem; }
+.lista-reportes { display: flex; flex-direction: column; gap: 0.75rem; }
+.item-reporte { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; background: var(--superficie); border-radius: var(--radio); box-shadow: var(--sombra); padding: 1rem 1.25rem; }
+.item-reporte-titulo { font-weight: 600; font-size: 1.0625rem; }
+.item-reporte-detalle { font-size: 0.875rem; color: var(--tenue); }
+
 /* ---------- Configuración ---------- */
 .acerca { display: flex; align-items: center; gap: 1.25rem; }
 .acerca-icono { width: 4.5rem; height: 4.5rem; filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.15)); }

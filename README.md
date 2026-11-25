@@ -48,9 +48,18 @@ Con el certificado, `electron-builder` firma solo: se configura en `electron-bui
 
 ## Dónde están los datos
 
-- Base de datos: `%APPDATA%\fitness-control\fitness-control.db` (la misma en desarrollo y en la app instalada).
-- Copias de seguridad: al cerrar la app se guarda una copia del día en la carpeta elegida en **Configuración → Copias de seguridad**. Por defecto es `Documentos\FitnessControl\Copias`. Se conservan las últimas 30.
-- Restaurar una copia reemplaza todos los datos. Antes de hacerlo, la app guarda los datos actuales en `%APPDATA%\fitness-control\antes-de-restaurar-<fecha>.db`.
+Los datos de desarrollo y los de la app instalada **nunca se mezclan**:
+
+| | App instalada | `npm run dev` |
+|---|---|---|
+| Base de datos | `%APPDATA%\fitness-control\fitness-control.db` | `.datos-dev\fitness-control.db` (dentro del proyecto, ignorado por git) |
+| Copias de seguridad (por defecto) | `Documentos\FitnessControl\Copias` | `.datos-dev\copias` |
+| Reportes (carpeta sugerida) | `Documentos\FitnessControl\Reportes\<Alumno>` | `.datos-dev\reportes\<Alumno>` |
+
+`npm run demo` carga los alumnos de ejemplo en `.datos-dev`, nunca en la carpeta de la app instalada.
+
+- Al cerrar la app se guarda una copia del día en la carpeta elegida en **Configuración → Copias de seguridad**. Se conservan las últimas 30.
+- Restaurar una copia reemplaza todos los datos. Antes de hacerlo, la app guarda los datos actuales en su carpeta de datos como `antes-de-restaurar-<fecha>.db`.
 
 ## Variables solo para pruebas automáticas
 
@@ -59,3 +68,4 @@ Con el certificado, `electron-builder` firma solo: se configura en `electron-bui
 | `FITNESS_DATOS` | Usa otra carpeta de datos (para no tocar los datos reales) |
 | `FITNESS_PDF_DESTINO` | Guarda el PDF en esa carpeta sin mostrar el diálogo |
 | `FITNESS_COPIA_A_RESTAURAR` | Usa ese archivo como copia a restaurar sin mostrar el diálogo |
+| `FITNESS_SIN_ABRIR` | "Enviar por WhatsApp" no abre WhatsApp (solo escribe el enlace en la consola) |

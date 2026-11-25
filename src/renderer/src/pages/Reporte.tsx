@@ -4,7 +4,9 @@ import { masaGrasaKg } from '@shared/calculos'
 import { compararControles, type FilaComparacion } from '@shared/comparacion'
 import { ETIQUETA_CAMPO } from '@shared/etiquetas'
 import { formatearFecha, formatearNumero, hoyLocal } from '@shared/formato'
-import { CAMPOS_REPORTE, DATOS_PUBLICOS, type Alumno, type CampoReporte, type Configuracion, type Control } from '@shared/tipos'
+import { CAMPOS_REPORTE, DATOS_PUBLICOS, type Alumno, type CampoReporte, type Configuracion, type Control, type ReporteGuardado } from '@shared/tipos'
+import AccionesReporte from '../components/AccionesReporte'
+import { mensajeDeError } from '../errores'
 import GraficoEvolucion, { type Serie } from '../components/GraficoEvolucion'
 import TablaComparacion from '../components/TablaComparacion'
 
@@ -35,7 +37,9 @@ export default function Reporte() {
   const [config, setConfig] = useState<Configuracion | null>(null)
   const [campos, setCampos] = useState<CampoReporte[]>([...DATOS_PUBLICOS])
   const [nota, setNota] = useState('')
-  const [estado, setEstado] = useState<{ tipo: 'ok'; ruta: string } | { tipo: 'error'; mensaje: string } | null>(null)
+  const [estado, setEstado] = useState<{ tipo: 'ok'; reporte: ReporteGuardado; reemplazado: boolean } | { tipo: 'error'; mensaje: string } | null>(null)
+  // Reporte ya generado para este mismo par de Controles (se reemplaza al volver a generarlo).
+  const [previo, setPrevio] = useState<ReporteGuardado | null>(null)
   const [generando, setGenerando] = useState(false)
   // La vista previa se achica para entrar en la ventana; el PDF siempre sale en tamaño real.
   const contenedor = useRef<HTMLDivElement>(null)
@@ -70,6 +74,16 @@ export default function Reporte() {
   useEffect(() => {
     setNota(actual?.notaReporte ?? '')
   }, [actual?.id])
+
+  useEffect(() => {
+    if (!base || !actual) return
+    setEstado(null)
+    window.api.reporte.historial(id).then((h) => {
+      const r = h.find((x) => x.controlBaseId === base.id && x.controlActualId === actual.id) ?? null
+      setPrevio(r)
+      if (r) setCampos(r.campos)
+    })
+  }, [id, base?.id, actual?.id])
 
   const filas = useMemo(() => (base && actual ? compararControles(base, actual) : []), [base, actual])
   const datos = useMemo(
@@ -110,10 +124,20 @@ export default function Reporte() {
       // Se guardan la nota (con el Control) y la selección de datos (con el Alumno).
       await window.api.controles.actualizar(actual.id, { notaReporte: nota.trim() || null })
       await window.api.alumnos.actualizar(alumno.id, { camposReporte: campos })
-      const ruta = await window.api.reporte.guardarPdf(`Reporte ${alumno.nombre} ${actual.fecha}`)
-      if (ruta) setEstado({ tipo: 'ok', ruta })
+      const resultado = await window.api.reporte.guardarPdf({
+        alumnoId: alumno.id,
+        controlBaseId: base!.id,
+        controlActualId: actual.id,
+        campos,
+        nota: nota.trim() || null,
+        nombreSugerido: `Reporte ${alumno.nombre} ${base!.fecha} a ${actual.fecha}`
+      })
+      if (resultado) {
+        setEstado({ tipo: 'ok', ...resultado })
+        setPrevio(resultado.reporte)
+      }
     } catch (e) {
-      setEstado({ tipo: 'error', mensaje: (e as Error).message })
+      setEstado({ tipo: 'error', mensaje: mensajeDeError(e) })
     } finally {
       setGenerando(false)
     }
@@ -161,22 +185,22 @@ export default function Reporte() {
           <span className="campo-etiqueta">Nota para {alumno.nombre.split(' ')[0]}</span>
           <textarea rows={5} value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Ej.: ¡Muy bien esta semana! Seguimos con…" />
         </label>
+        {previo && estado?.tipo !== 'ok' && (
+          <p className="nota-config">
+            Ya generaste un reporte de esta comparación el {new Date(previo.actualizadoEn).toLocaleDateString('es-AR')}. Al generarlo de nuevo se
+            reemplaza el mismo archivo.
+          </p>
+        )}
         <button onClick={guardarPdf} disabled={generando}>
-          {generando ? 'Generando…' : 'Guardar PDF'}
+          {generando ? 'Generando…' : previo ? 'Volver a generar PDF' : 'Guardar PDF'}
         </button>
         {estado?.tipo === 'ok' && (
           <div className="resultado">
-            <span>PDF guardado.</span>
-            <div className="acciones">
-              <button className="secundario chico" onClick={() => window.api.reporte.abrir(estado.ruta)}>
-                Abrir
-              </button>
-              <button className="secundario chico" onClick={() => window.api.reporte.mostrarEnCarpeta(estado.ruta)}>
-                Mostrar en carpeta
-              </button>
-            </div>
+            <span>{estado.reemplazado ? 'PDF reemplazado.' : 'PDF guardado.'}</span>
+            <AccionesReporte reporte={estado.reporte} nombreAlumno={alumno.nombre} compacto />
           </div>
         )}
+        {previo && estado?.tipo !== 'ok' && <AccionesReporte reporte={previo} nombreAlumno={alumno.nombre} compacto />}
         {estado?.tipo === 'error' && <p className="error">{estado.mensaje}</p>}
       </aside>
 

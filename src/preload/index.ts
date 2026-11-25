@@ -28,9 +28,12 @@ const api: FitnessApi = {
     restaurar: (ruta) => ipcRenderer.invoke(CANALES.backupRestaurar, ruta)
   },
   reporte: {
-    guardarPdf: (nombre) => ipcRenderer.invoke(CANALES.reporteGuardarPdf, nombre),
-    abrir: (ruta) => ipcRenderer.invoke(CANALES.reporteAbrir, ruta),
-    mostrarEnCarpeta: (ruta) => ipcRenderer.invoke(CANALES.reporteMostrar, ruta)
+    guardarPdf: (datos) => ipcRenderer.invoke(CANALES.reporteGuardarPdf, datos),
+    historial: (alumnoId) => ipcRenderer.invoke(CANALES.reporteHistorial, alumnoId),
+    abrir: (id) => ipcRenderer.invoke(CANALES.reporteAbrir, id),
+    mostrarEnCarpeta: (id) => ipcRenderer.invoke(CANALES.reporteMostrar, id),
+    enviarPorWhatsApp: (id) => ipcRenderer.invoke(CANALES.reporteWhatsApp, id),
+    quitar: (id) => ipcRenderer.invoke(CANALES.reporteQuitar, id)
   }
 }
 

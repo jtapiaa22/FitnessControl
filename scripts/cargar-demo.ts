@@ -4,13 +4,18 @@
 // Los alumnos de ejemplo terminan sus notas con "(alumno de ejemplo)"; nunca se tocan otros.
 // (También borra los de versiones anteriores, marcados con "[Demo]" al principio.)
 // Cerrá la app antes de correrlo.
+import { mkdirSync } from 'node:fs'
 import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import Database from 'better-sqlite3'
 import { migrar } from '../src/main/db/esquema.ts'
 import { crearRepositorio } from '../src/main/db/repositorio.ts'
 
 const MARCA = '(alumno de ejemplo)'
-const ruta = join(process.env.APPDATA ?? '', 'fitness-control', 'fitness-control.db')
+// Los datos de ejemplo van a la carpeta de desarrollo (la que usa npm run dev), nunca a la de la app instalada.
+const carpeta = fileURLToPath(new URL('../.datos-dev/', import.meta.url))
+mkdirSync(carpeta, { recursive: true })
+const ruta = join(carpeta, 'fitness-control.db')
 const db = new Database(ruta)
 db.pragma('journal_mode = DELETE')
 db.pragma('foreign_keys = ON')

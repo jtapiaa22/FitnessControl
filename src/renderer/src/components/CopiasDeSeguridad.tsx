@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { mensajeDeError } from '../errores'
 
 /** Copias de seguridad: carpeta, última copia, copia manual y restaurar. */
 export default function CopiasDeSeguridad() {
@@ -25,7 +26,7 @@ export default function CopiasDeSeguridad() {
     try {
       await fn()
     } catch (e) {
-      setEstado({ tipo: 'error', texto: (e as Error).message.replace(/^Error invoking remote method '[^']+': (Error: )?/, '') })
+      setEstado({ tipo: 'error', texto: mensajeDeError(e) })
     } finally {
       setOcupado(false)
       await cargar()

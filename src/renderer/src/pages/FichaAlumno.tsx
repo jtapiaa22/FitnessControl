@@ -4,7 +4,8 @@ import { masaGrasaKg } from '@shared/calculos'
 import { estadoDeControl } from '@shared/controlPendiente'
 import { ETIQUETA_OBJETIVO, ETIQUETA_SEXO } from '@shared/etiquetas'
 import { formatearFecha, formatearNumero, hoyLocal } from '@shared/formato'
-import type { Alumno, Control } from '@shared/tipos'
+import type { Alumno, Control, ReporteGuardado } from '@shared/tipos'
+import AccionesReporte from '../components/AccionesReporte'
 import EstadoControl from '../components/EstadoControl'
 
 export default function FichaAlumno() {
@@ -12,11 +13,13 @@ export default function FichaAlumno() {
   const navegar = useNavigate()
   const [alumno, setAlumno] = useState<Alumno | null>(null)
   const [controles, setControles] = useState<Control[]>([])
+  const [reportes, setReportes] = useState<ReporteGuardado[]>([])
   const [error, setError] = useState<string | null>(null)
 
   const cargar = useCallback(async () => {
     try {
-      const [a, c] = await Promise.all([window.api.alumnos.obtener(id), window.api.controles.listarPorAlumno(id)])
+      const [a, c, r] = await Promise.all([window.api.alumnos.obtener(id), window.api.controles.listarPorAlumno(id), window.api.reporte.historial(id)])
+      setReportes(r)
       setAlumno(a)
       setControles(c)
     } catch (e) {
@@ -134,6 +137,42 @@ export default function FichaAlumno() {
           </tbody>
         </table>
         </div>
+      )}
+
+      {reportes.length > 0 && (
+        <>
+          <h2>Reportes</h2>
+          <div className="lista-reportes">
+            {reportes.map((r) => {
+              const numero = (controlId: string) => controles.findIndex((c) => c.id === controlId) + 1
+              return (
+                <div key={r.id} className="item-reporte">
+                  <div>
+                    <div className="item-reporte-titulo">
+                      Control {numero(r.controlBaseId)} → Control {numero(r.controlActualId)}
+                    </div>
+                    <div className="item-reporte-detalle">
+                      {formatearFecha(r.fechaBase)} a {formatearFecha(r.fechaActual)} · generado el {new Date(r.actualizadoEn).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' })}
+                    </div>
+                  </div>
+                  <div className="acciones">
+                    <AccionesReporte reporte={r} nombreAlumno={alumno.nombre} compacto />
+                    <button
+                      className="secundario chico"
+                      title="Quita el reporte de esta lista. El PDF queda en la compu."
+                      onClick={async () => {
+                        await window.api.reporte.quitar(r.id)
+                        await cargar()
+                      }}
+                    >
+                      Quitar
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </>
       )}
     </section>
   )

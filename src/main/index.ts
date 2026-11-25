@@ -1,15 +1,15 @@
-import { mkdir, writeFile } from 'node:fs/promises'
+import { mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron'
 import { CANALES } from '@shared/api'
 import { carpetaPorDefecto, crearBackup, restaurarSobreBaseDanada, type Backup } from './backup'
 import { abrirBaseDeDatos, BaseDanadaError, rutaBaseDeDatos } from './db'
 import { crearRepositorio, type Repositorio } from './db/repositorio'
+import { carpetaDeDatos } from './carpetas'
+import { registrarReportes } from './reportes'
 
-// La carpeta de datos es siempre %APPDATA%\fitness-control, en desarrollo y en la
-// app instalada (el instalador le pone otro nombre visible a la app).
-// FITNESS_DATOS: solo para pruebas automáticas, usa otra carpeta de datos.
-app.setPath('userData', process.env.FITNESS_DATOS ?? join(app.getPath('appData'), 'fitness-control'))
+// Desarrollo e instalada usan carpetas de datos distintas (ver carpetas.ts).
+app.setPath('userData', carpetaDeDatos())
 
 function crearVentana(): void {
   const ventana = new BrowserWindow({
@@ -65,7 +65,7 @@ function registrarIpc(): void {
   ipcMain.handle(CANALES.controlesEliminar, (_e, id: string) => repo.controles.eliminar(id))
   ipcMain.handle(CANALES.configuracionObtener, () => repo.configuracion.obtener())
   ipcMain.handle(CANALES.configuracionGuardar, (_e, cambios) => repo.configuracion.guardar(cambios))
-  registrarReporte()
+  registrarReportes(repo)
   registrarBackup(backup, repo)
 }
 
@@ -125,35 +125,6 @@ function registrarBackup(backup: Backup, repo: Repositorio): void {
   })
 }
 
-/** PDF del Reporte: imprime la pantalla actual con sus estilos @media print. */
-function registrarReporte(): void {
-  // Solo se abren archivos que esta app generó en esta sesión.
-  const generados = new Set<string>()
-
-  ipcMain.handle(CANALES.reporteGuardarPdf, async (e, nombreSugerido: string) => {
-    const ventana = BrowserWindow.fromWebContents(e.sender)
-    const nombre = `${nombreSugerido.replace(/[\\/:*?"<>|]/g, '-')}.pdf`
-    const opciones = { title: 'Guardar reporte', defaultPath: join(app.getPath('documents'), nombre), filters: [{ name: 'PDF', extensions: ['pdf'] }] }
-    // FITNESS_PDF_DESTINO: solo para pruebas automáticas, evita el diálogo de guardar.
-    const destinoDePrueba = process.env.FITNESS_PDF_DESTINO
-    const { canceled, filePath } = destinoDePrueba
-      ? { canceled: false, filePath: join(destinoDePrueba, nombre) }
-      : ventana
-        ? await dialog.showSaveDialog(ventana, opciones)
-        : await dialog.showSaveDialog(opciones)
-    if (canceled || !filePath) return null
-    const pdf = await e.sender.printToPDF({ pageSize: 'A4', printBackground: true, margins: { top: 0.4, bottom: 0.4, left: 0.4, right: 0.4 } })
-    await writeFile(filePath, pdf)
-    generados.add(filePath)
-    return filePath
-  })
-  ipcMain.handle(CANALES.reporteAbrir, async (_e, ruta: string) => {
-    if (generados.has(ruta)) await shell.openPath(ruta)
-  })
-  ipcMain.handle(CANALES.reporteMostrar, (_e, ruta: string) => {
-    if (generados.has(ruta)) shell.showItemInFolder(ruta)
-  })
-}
 
 // Una sola instancia: dos ventanas usando la misma base a la vez es buscar problemas.
 if (!app.requestSingleInstanceLock()) {

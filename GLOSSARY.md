@@ -64,7 +64,7 @@ Si un valor subió, bajó o quedó igual entre los dos Controles de una Comparac
 _Avoid_: Valoración, mejora, retroceso, progreso
 
 **Reporte**:
-PDF detallado, con gráficos, que la Instructora le entrega al Alumno con una Comparación. Ella elige qué datos incluir y puede agregar un texto propio.
+PDF detallado, con gráficos, que la Instructora le entrega al Alumno con una Comparación. Ella elige qué datos incluir y puede agregar un texto propio. Queda en el historial del Alumno: hay uno solo por cada par de Controles, y generarlo de nuevo lo reemplaza.
 _Avoid_: Ficha, informe, planilla
 
 **Nota del reporte**:

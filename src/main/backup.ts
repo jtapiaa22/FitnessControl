@@ -9,6 +9,7 @@ import { app } from 'electron'
 import Database from 'better-sqlite3'
 import { hoyLocal } from '@shared/formato'
 import type { Repositorio } from './db/repositorio'
+import { carpetaDeCopiasPorDefecto } from './carpetas'
 import { VERSION_ESQUEMA } from './db/esquema'
 
 const COPIAS_A_CONSERVAR = 30
@@ -19,9 +20,7 @@ export interface ResumenCopia {
   controles: number
 }
 
-export function carpetaPorDefecto(): string {
-  return join(app.getPath('documents'), 'FitnessControl', 'Copias')
-}
+export const carpetaPorDefecto = carpetaDeCopiasPorDefecto
 
 /** Revisa que el archivo sea una copia sana de FitnessControl y cuenta lo que tiene. */
 export function revisarCopia(ruta: string): ResumenCopia {
