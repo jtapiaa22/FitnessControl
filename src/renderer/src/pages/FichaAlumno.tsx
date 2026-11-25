@@ -61,6 +61,11 @@ export default function FichaAlumno() {
               + Nuevo control
             </Link>
           )}
+          {controles.length >= 2 && (
+            <Link className="boton secundario" to={`/alumnos/${id}/comparar`}>
+              Comparar
+            </Link>
+          )}
           <Link className="boton secundario" to={`/alumnos/${id}/editar`}>
             Editar
           </Link>

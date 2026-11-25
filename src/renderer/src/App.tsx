@@ -1,6 +1,7 @@
 import { NavLink, Route, Routes } from 'react-router-dom'
 import AlumnoForm from './pages/AlumnoForm'
 import Alumnos from './pages/Alumnos'
+import Comparacion from './pages/Comparacion'
 import ControlForm from './pages/ControlForm'
 import FichaAlumno from './pages/FichaAlumno'
 import Inicio from './pages/Inicio'
@@ -24,6 +25,7 @@ export default function App() {
           <Route path="/alumnos/nuevo" element={<AlumnoForm />} />
           <Route path="/alumnos/:id" element={<FichaAlumno />} />
           <Route path="/alumnos/:id/editar" element={<AlumnoForm />} />
+          <Route path="/alumnos/:id/comparar" element={<Comparacion />} />
           <Route path="/alumnos/:id/controles/nuevo" element={<ControlForm />} />
           <Route path="/alumnos/:id/controles/:controlId" element={<ControlForm />} />
         </Routes>

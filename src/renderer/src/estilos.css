@@ -82,3 +82,18 @@ legend { font-weight: 600; padding: 0 6px; }
 .calculado { margin: 12px 0 0; color: var(--tenue); }
 .calculado strong { color: #1f2a24; }
 .lados { margin: 16px 0 12px; }
+
+/* Comparación */
+.selector-controles select { margin-left: 4px; }
+.tabla.comparacion { max-width: 760px; }
+.tabla .num { text-align: right; font-variant-numeric: tabular-nums; }
+.privado { margin-left: 8px; font-weight: 500; }
+/* El color solo marca si sube o baja; no juzga (ver GLOSSARY.md, "Cambio"). */
+.cambio { display: inline-flex; align-items: center; gap: 6px; }
+.cambio .flecha { font-size: 11px; }
+.cambio.sube .flecha { color: #2a78d6; }
+.cambio.baja .flecha { color: #eb6834; }
+.cambio.igual .flecha { color: var(--tenue); }
+.graficos { display: grid; grid-template-columns: repeat(auto-fill, minmax(460px, 1fr)); gap: 16px; }
+.grafico { margin: 0; background: #fcfcfb; border: 1px solid var(--borde); border-radius: 8px; padding: 14px 12px 8px; }
+.grafico figcaption { font-weight: 600; margin: 0 0 6px 8px; }
